@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>edu.snu.cms.reef</groupId>
-  <artifactId>reef-tutorial</artifactId>
+  <artifactId>cms-reef-tutorial</artifactId>
   <version>1.0</version>
   <packaging>jar</packaging>
   <name>K-means Clustering</name>
