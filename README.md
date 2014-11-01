@@ -42,7 +42,7 @@ If you have another way to load your data into the HDFS, or if you're planning t
 
 #### How to run the code
 Run the application either on local runtime, or YARN runtime, using the `run.sh` script provided in the `bin` folder.
-* Run on local runtime by adding the `-local true` option, while giving your data that is in HDFS as input (for OSes other than Linux, use your own OS's syntax of executing `.sh`):
+* Run on local runtime by adding the `-local true` option, while giving your data that is in HDFS using `-input` (for OSes other than Linux, use your own OS's syntax of executing `.sh`):
     ```
     ./run.sh -input sample -local true 
     ```
