@@ -41,13 +41,13 @@ If your data files are too big and is rather hard to modify, you can always defi
 If you have another way to load your data into the HDFS, or if you're planning to run the code on local rutime, then this step can be skipped.
 
 #### How to run the code
-You can use either local runtime, or YARN runtime to run the code.
-* Run the application in local runtime by adding the `-local true` option (for OSes other than Linux, use your own OS's syntax of executing `.sh`):
+Run the application either on local runtime, or YARN runtime, using the `run.sh` script provided in the `bin` folder.
+* Run on local runtime by adding the `-local true` option, while giving your data that is in HDFS as input (for OSes other than Linux, use your own OS's syntax of executing `.sh`):
     ```
-    ./run.sh -local true -input sample
+    ./run.sh -input sample -local true 
     ```
 
-* Run the application in YARN runtime by executing the `run.sh` script provided in the `bin` folder while giving your data that is in HDFS as input (give the absolute path to the file):
+* Run on YARN runtime by adding the `-local false`, or either entirely omitting it (give the absolute path to the file):
     ```
     ./run.sh -input /user/username/sample
     ```
