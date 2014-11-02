@@ -1,10 +1,13 @@
 Rails.application.routes.draw do
-  get 'evaluators' => 'evaluators#show'
-  get 'evaluators/:id/status' => 'evaluators#status'
-  get 'evaluators/:id/timeseries/:metric' => 'evaluators#metric'
-  get 'tasks' => 'tasks#show'
-  get 'tasks/:id/status' => 'tasks#status'
-  post 'tasks/:id/run' => 'tasks#run'
+  get 'api/' => 'drivers#info'
+  post 'api/control' => 'drivers#control'
+  get 'api/evaluators' => 'evaluators#show'
+  get 'api/evaluators/:id/status' => 'evaluators#status'
+  get 'api/evaluators/:id/resources/:name' => 'evaluators#resource'
+  get 'api/evaluators/:id/timeseries/:name' => 'evaluators#timeseries'
+  get 'api/tasks' => 'tasks#show'
+  get 'api/tasks/:id/status' => 'tasks#status'
+  get 'api/tasks/:id/logs' => 'tasks#logs'
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
