@@ -9,26 +9,30 @@ class EvaluatorsController < ApplicationController
     render :json => data
   end
 
-  def metric
-    data = {:metric => params[:metric], :points => get_data}
+  def resource
+    data = {:evaluator_id => params[:id], :resource => params[:name], :point => get_random_point}
+    render :json => data
+  end
+
+  def timeseries
+    data = {:evaluator_id => params[:id], :resource => params[:name], :points => get_random_points}
     render :json => data
   end
 
   private
-  def get_data
-    data = Array.new
-    time = js_current_time
+  def get_random_point(offset=0)
+    time = js_current_time + offset*1000
     rand = Random.new(Random.new_seed)
+    return {:time => time, :value => rand.rand}
+  end
+
+  def get_random_points
+    data = Array.new
 
     i = -19
 
     while i <= 0 do
-      data.push(
-        {
-          :time => time + i*1000,
-          :value => rand.rand
-        }
-      )
+      data.push(get_random_point i)
       i = i+1
     end
     return data
