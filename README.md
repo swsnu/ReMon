@@ -1,7 +1,8 @@
 reef-examples
 =============
 
-Sample maching learning code for the Big Data and Cloud Systems Course offered at Seoul National University (SNU)
+Sample maching learning code for the Big Data and Cloud Systems Course offered at Seoul National University (SNU).
+When Shimoga is merged into Apache REEF, we plan to migrate this example to Apache REEF codebase. 
 
 ## *k*-means clustering
 
@@ -14,7 +15,7 @@ Sample maching learning code for the Big Data and Cloud Systems Course offered a
     mvn build install
     ```
 
-3. Build reef-tutorial (must be done after 1):
+3. Build reef-tutorial (must be done after 1 and 2):
     ```
     git clone https://github.com/cmssnu/reef-tutorial
     mvn build install
@@ -32,7 +33,8 @@ Sample maching learning code for the Big Data and Cloud Systems Course offered a
     9.956114269742638 -9.812786238606305 -8.413419757847734
     ```
 Your file should contain numerical values that represent vectors, with each vector separated by new lines and each value separated within a vector with at least one space. The algorithm is constructed to read initial cluster centroids too, so mark the vectors that you will use as centroids with an asterik (although they are all in one place in the above example, actually you may place them anywhere like above). A sample file `bin/sample` is included for your convenience.  
-If your data files are too big and is rather hard to modify, you can always define your own format by writing your own `KMeansDataParser` class, which is again included in the code (search the `src` folder).  
+You can always download and use real data sets instead of using the sample provided. The [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml/) contains a vast amount of data sets for ML researchers. In fact, the [HIGGS data set](http://archive.ics.uci.edu/ml/datasets/HIGGS) was used for evaluating the performance of this code; simply download the gzip provided, mark some centroids, and then you're ready to use them.  
+If your data files are too big and are rather hard to modify, you can always define your own format by writing your own `KMeansDataParser` class, which is again included in the code (search the `src` folder).  
 
 2. To run your application in YARN runtime, you need to upload your local file to the HDFS:
     ```
@@ -41,15 +43,15 @@ If your data files are too big and is rather hard to modify, you can always defi
 If you have another way to load your data into the HDFS, or if you're planning to run the code on local rutime, then this step can be skipped.
 
 #### How to run the code
-You can use either local runtime, or YARN runtime to run the code.
-* Run the application in YARN runtime by executing the `run.sh` script provided in the `bin` folder while giving your data that is in HDFS as input (for OSes other than Linux, use your OS's syntax of executing `.sh`):
+Run the application either on local runtime, or YARN runtime, using the `run.sh` script provided in the `bin` folder.
+* Run on local runtime by adding the `-local true` option, while giving your data that is in HDFS using `-input` (for OSes other than Linux, use your own OS's syntax of executing `.sh`):
     ```
-    ./run.sh -input /user/username/sample
+    ./run.sh -input sample -local true 
     ```
 
-* Run the application in local runtime by adding the `-local true` option (in this case add the `file:///` prefix for your data):
+* Run on YARN runtime by adding the `-local false`, or either entirely omitting it (give the absolute path to the file):
     ```
-    ./run.sh -local true -input file:///user/username/sample
+    ./run.sh -input /user/username/sample
     ```
     
 #### Additional options
@@ -65,7 +67,7 @@ You can use either local runtime, or YARN runtime to run the code.
     
 * Specify the threshold value used to determine algorithm convergence by the `-convThr` option (default 0.01):
     ```
-    ./run.sh -input /user/username/sample -convThr
+    ./run.sh -input /user/username/sample -convThr 0.01
     ```
 
 * Restrict the maximum number of iterations the algorithm is allowed to perform before it stops, by the `-maxIter` option (default 20 times):
@@ -77,3 +79,7 @@ You can use either local runtime, or YARN runtime to run the code.
     ```
     ./run.sh -input /user/username/sample -splitNum 4
     ```
+
+## How to contribute
+If you find issues, please report them in github issues. If you would like to contribute code, please work on the changes you want to make in a forked repo and send us a pull request about the changes.
+

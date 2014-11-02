@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2014 Microsoft Corporation
+# Copyright (C) 2014 Seoul National University
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 #
 
 # EXAMPLE USAGE 
-# ./run.sh -convThr 0.01 -maxIter 20 -split 4 -input /user/myname/file
+# ./run.sh -input /user/username/filename -timeout 100000 -convThr 0.01 -maxIter 20 -splitNum 4
 
 # RUNTIME
-SELF_JAR=../target/ml-1.0-shaded.jar
+SELF_JAR=../target/cms-reef-tutorial-1.0-shaded.jar
 
 LOGGING_CONFIG='-Djava.util.logging.config.class=org.apache.reef.util.logging.Config'
 

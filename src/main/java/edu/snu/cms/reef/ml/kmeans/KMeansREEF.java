@@ -131,8 +131,9 @@ public final class KMeansREEF {
   }
 
   private final Configuration getDriverConfWithDataLoad() {
-    final ConfigurationModule kMeansDriverConf = EnvironmentUtils
-        .addClasspath(DriverConfiguration.CONF, DriverConfiguration.GLOBAL_FILES)
+    final ConfigurationModule kMeansDriverConf = DriverConfiguration.CONF
+        .set(DriverConfiguration.GLOBAL_LIBRARIES, EnvironmentUtils.getClassLocation(KMeansDriver.class))
+        .set(DriverConfiguration.GLOBAL_LIBRARIES, EnvironmentUtils.getClassLocation(TextInputFormat.class))
         .set(DriverConfiguration.DRIVER_IDENTIFIER, "K-means Clustering")
         .set(DriverConfiguration.ON_CONTEXT_ACTIVE, KMeansDriver.ActiveContextHandler.class)
         .set(DriverConfiguration.ON_TASK_FAILED, KMeansDriver.FailedTaskHandler.class);
