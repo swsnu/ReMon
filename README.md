@@ -1,7 +1,8 @@
 reef-examples
 =============
 
-Sample maching learning code for the Big Data and Cloud Systems Course offered at Seoul National University (SNU)
+Sample maching learning code for the Big Data and Cloud Systems Course offered at Seoul National University (SNU).
+When Shimoga is merged into Apache REEF, we plan to migrate this example to Apache REEF codebase. 
 
 ## *k*-means clustering
 
@@ -14,7 +15,7 @@ Sample maching learning code for the Big Data and Cloud Systems Course offered a
     mvn build install
     ```
 
-3. Build reef-tutorial (must be done after 1):
+3. Build reef-tutorial (must be done after 1 and 2):
     ```
     git clone https://github.com/cmssnu/reef-tutorial
     mvn build install
@@ -66,7 +67,7 @@ Run the application either on local runtime, or YARN runtime, using the `run.sh`
     
 * Specify the threshold value used to determine algorithm convergence by the `-convThr` option (default 0.01):
     ```
-    ./run.sh -input /user/username/sample -convThr
+    ./run.sh -input /user/username/sample -convThr 0.01
     ```
 
 * Restrict the maximum number of iterations the algorithm is allowed to perform before it stops, by the `-maxIter` option (default 20 times):
@@ -78,3 +79,7 @@ Run the application either on local runtime, or YARN runtime, using the `run.sh`
     ```
     ./run.sh -input /user/username/sample -splitNum 4
     ```
+
+## How to contribute
+If you find issues, please report them in github issues. If you would like to contribute code, please work on the changes you want to make in a forked repo and send us a pull request about the changes.
+
