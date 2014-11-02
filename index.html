@@ -5,8 +5,12 @@
     <title>ReMon</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link type="text/css" rel="stylesheet" href="{{ static_url('css/bootstrap.min.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ static_url('css/rickshaw.min.css') }}">
     <script type="text/javascript" src="{{ static_url('js/jquery.min.js') }}"></script>
     <script type="text/javascript" src="{{ static_url('js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/d3.v3.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/rickshaw.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/demo.js') }}"></script>
     <!--[if lt IE 9]>
         <script type="text/javascript" src="{{ static_url('js/html5shiv.min.js') }}"></script>
         <script type="text/javascript" src="{{ static_url('js/respond.min.js') }}"></script>
@@ -108,6 +112,13 @@
                 <li>memory: 0.50</li>
                 <li>cpu: 0.58</li>
             </ul>
+        </div>
+    </div>
+    <div id="timeseries-screen">
+        <div class="row">
+            <h2>Timeseries</h2>
+            <h3>ev_0 - memory</h3>
+            <div id="chart"></div>
         </div>
     </div>
     <div id="logs-screen">
