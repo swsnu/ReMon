@@ -32,7 +32,8 @@ Sample maching learning code for the Big Data and Cloud Systems Course offered a
     9.956114269742638 -9.812786238606305 -8.413419757847734
     ```
 Your file should contain numerical values that represent vectors, with each vector separated by new lines and each value separated within a vector with at least one space. The algorithm is constructed to read initial cluster centroids too, so mark the vectors that you will use as centroids with an asterik (although they are all in one place in the above example, actually you may place them anywhere like above). A sample file `bin/sample` is included for your convenience.  
-If your data files are too big and is rather hard to modify, you can always define your own format by writing your own `KMeansDataParser` class, which is again included in the code (search the `src` folder).  
+You can always download and use real data sets instead of using the sample provided. The [UCI Machine Learning Repository](http://archive.ics.uci.edu/ml/) contains a vast amount of data sets for ML researchers. In fact, the [HIGGS data set](http://archive.ics.uci.edu/ml/datasets/HIGGS) was used for evaluating the performance of this code; simply download the gzip provided, mark some centroids, and then you're ready to use them.  
+If your data files are too big and are rather hard to modify, you can always define your own format by writing your own `KMeansDataParser` class, which is again included in the code (search the `src` folder).  
 
 2. To run your application in YARN runtime, you need to upload your local file to the HDFS:
     ```
