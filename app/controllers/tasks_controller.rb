@@ -1,5 +1,4 @@
 class TasksController < ApplicationController
-  skip_before_action :verify_authenticity_token
   def show
     data = {:tasks => [{:id => "task_ev_0"}, {:id => "task_ev_1"}, {:id => "task_ev_2"}, {:id => "task_ev_3"}, {:id => "task_ev_4"}, ]}
     render :json => data
@@ -7,11 +6,6 @@ class TasksController < ApplicationController
 
   def status
     data = {:task_id => params[:id], :status => "RUNNING"}
-    render :json => data
-  end
-
-  def run
-    data = {:result => "SUCCESS"}
     render :json => data
   end
 end
