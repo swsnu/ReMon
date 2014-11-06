@@ -42,7 +42,8 @@ class MessageQueue:
         self.subscribers.add(client)
 
     def unregister(self, client):
-        self.subscribers.remove(client)
+        if client in self.subscribers:
+            self.subscribers.remove(client)
 
     def publish(self, message):
         logging.info('Publishing "%s"' % message)
@@ -51,20 +52,21 @@ class MessageQueue:
 
 
 class WebsocketHandler(tornado.websocket.WebSocketHandler):
-    def __init__(self, *args, **kwargs):
-        self.mq = MessageQueue()
-        tornado.websocket.WebSocketHandler.__init__(self, *args, **kwargs)
+    mq = MessageQueue()
 
     def open(self):
         logging.info('Websocket opened')
-        self.mq.register(self)
 
     def on_close(self):
         logging.info('Websocket closed')
-        self.mq.unregister(self)
+        WebsocketHandler.mq.unregister(self)
 
     def on_message(self, message):
-        self.mq.publish('Echo: %s' % message)
+        data = tornado.escape.json_decode(message)
+        if data.get('op') == u'register':
+            WebsocketHandler.mq.register(self)
+        else:
+            WebsocketHandler.mq.publish(message)
 
 
 if __name__ == '__main__':

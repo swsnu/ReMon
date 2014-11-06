@@ -39,3 +39,20 @@ function addValue(tagName, value)
     graphs[tagName].update();
     $('#value' + lookup[tagName]).text(value);
 }
+
+$(window).load(function() {
+    var socket = window['WebSocket'] || window['MozWebSocket'];
+    if (!socket) { console.log('Websocket not supported.'); return; }
+    var websocket = new socket('ws://' + document.location.hostname + ':8000/websocket');
+    websocket.onopen = function() {
+        console.log('Websocket opened.');
+        websocket.send(JSON.stringify({op: 'register'}));
+    }
+    websocket.onclose = function() {
+        console.log('Websocket closed.');
+    }
+    websocket.onmessage = function(event) {
+        var data = JSON.parse(event.data);
+        addValue(data.tag, data.value);
+    }
+});
