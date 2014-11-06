@@ -11,7 +11,6 @@
     <script type="text/javascript" src="/static/js/d3.v3.js"></script>
     <script type="text/javascript" src="/static/js/rickshaw.min.js"></script>
     <script type="text/javascript" src="/static/js/remon.js"></script>
-    <script type="text/javascript" src="/static/js/demo.js"></script>
     <!--[if lt IE 9]>
         <script type="text/javascript" src="/static/js/html5shiv.min.js"></script>
         <script type="text/javascript" src="/static/js/respond.min.js"></script>
@@ -27,154 +26,16 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <span class="navbar-brand">ReMon</span>
+            <a href="#" class="navbar-brand">ReMon</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-                <li id="connect-nav"><a href="#connect">Connect</a></li>
-                <li id="snapshot-nav"><a href="#snapshot">Snapshot</a></li>
-                <li id="timeseries-nav"><a href="#timeseries">Timeseries</a></li>
-                <li id="logs-nav"><a href="#logs">Logs</a></li>
-                <li id="controls-nav"><a href="#controls">Controls</a></li>
             </ul>
         </div>
     </div>
 </nav>
 <div class="container">
-    <div id="connect-screen">
-        <div class="row">
-            <div class="panel panel-primary">
-                <div class="panel-heading">Connect to API Server</div>
-                <div class="panel-body">
-                    <form id="connect-form" class="form-horizontal" role="form">
-                        <div class="form-group">
-                            <label for="hostname" class="col-sm-2 control-label">Server Address</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="hostname" placeholder="http://127.0.0.1:8080">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
-                                <button type="submit" class="btn btn-default">Connect</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div class="panel panel-primary">
-                <div class="panel-heading">Summary</div>
-                <div class="panel-body">
-                    <table class="table table-bordered">
-                        <tbody>
-                            <tr><th>Server Address</th><td id="td-server-address">http://127.0.0.1:8080</td></tr>
-                            <tr><th>Application ID</th><td id="td-application-id">app_0</td></tr>
-                            <tr><th>Application Name</th><td id="td-application-name">HelloREEF</td></tr>
-                            <tr><th>Support Aggregation</th><td id="td-support-aggregation">True</td></tr>
-                            <tr><th>Watching Resources</th><td id="td-watching-resources">memory, cpu</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="snapshot-screen">
-        <div class="row">
-            <h2>Summary</h2>
-            <ul id="evaluator-status-list">
-                <li>ev_0: BUSY (task_ev_0)</li>
-                <li>ev_1: BUSY (task_ev_1)</li>
-                <li>ev_2: BUSY (task_ev_2)</li>
-                <li>ev_3: BUSY (task_ev_3)</li>
-                <li>ev_4: AVAILABLE</li>
-            </ul>
-            <h2>Snapshot</h2>
-            <h3>ev_0</h3>
-            <ul class="resource-list">
-                <li>memory: 0.53</li>
-                <li>cpu: 0.47</li>
-            </ul>
-            <h3>ev_1</h3>
-            <ul class="resource-list">
-                <li>memory: 0.36</li>
-                <li>cpu: 0.48</li>
-            </ul>
-            <h3>ev_2</h3>
-            <ul class="resource-list">
-                <li>memory: 0.47</li>
-                <li>cpu: 0.52</li>
-            </ul>
-            <h3>ev_3</h3>
-            <ul class="resource-list">
-                <li>memory: 0.57</li>
-                <li>cpu: 0.40</li>
-            </ul>
-            <h3>ev_4</h3>
-            <ul class="resource-list">
-                <li>memory: 0.50</li>
-                <li>cpu: 0.58</li>
-            </ul>
-        </div>
-    </div>
-    <div id="timeseries-screen">
-        <div class="row">
-            <h2>Timeseries</h2>
-            <h3>ev_0 - memory</h3>
-            <div id="chart"></div>
-        </div>
-    </div>
-    <div id="logs-screen">
-        <div class="row">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Level</th>
-                        <th>Source</th>
-                        <th>Message</th>
-                        <th>Tags</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>2014-00-00 00:00:00</td>
-                        <td>WARNING</td>
-                        <td>ev_0</td>
-                        <td>Nobody listens to my hello.</td>
-                        <td><span class="label label-default">hello</span></td>
-                    </tr>
-                    <tr>
-                        <td>2014-00-00 00:00:00</td>
-                        <td>DEBUG</td>
-                        <td>ev_0</td>
-                        <td>Hello, world!</td>
-                        <td><span class="label label-default">hello</span> <span class="label label-default">test</span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div id="controls-screen">
-        <div class="row">
-            <div class="panel panel-primary">
-                <div class="panel-heading">Controls</div>
-                <div class="panel-body">
-                    <form id="controls-form" class="form-horizontal" role="form">
-                        <div class="form-group">
-                            <label for="command" class="col-sm-2 control-label">Command</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="command" placeholder="Command">
-                                <p class="help-block">Example: <code>restart</code>, <code>quit</code>, <code>kill evaluator ev_0</code>, <code>allocate evaluator</code>, <code>allocate task HelloREEF ev_4</code></p>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
-                                <button type="submit" class="btn btn-default">Run</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+    <div id="dashboard" class="row">
     </div>
 </div>
 </body>
