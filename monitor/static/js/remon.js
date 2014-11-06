@@ -53,6 +53,8 @@ $(window).load(function() {
     }
     websocket.onmessage = function(event) {
         var data = JSON.parse(event.data);
-        addValue(data.tag, data.value);
+        for (var i in data.metrics) {
+            addValue(data.metrics[i].tag, data.metrics[i].value);
+        }
     }
 });
