@@ -1,0 +1,28 @@
+[
+{
+  "namespace" : "edu.snu.cms.remon.collector",
+  "type" : "record",
+  "name" : "Metric",
+  "fields" :
+  [
+    { "name" : "tag", "type" : "string" },
+    { "name" : "value", "type" : "double" }
+  ]
+},
+{
+  "namespace" : "edu.snu.cms.remon.collector",
+  "type" : "record",
+  "name" : "Metrics",
+  "fields" :
+  [
+    {
+      "name" : "metrics",
+      "type" :
+      {
+        "type" : "array",
+        "items" : "Metric"
+      }
+    }
+  ]
+}
+]
