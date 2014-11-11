@@ -47,5 +47,4 @@ public class TestCollector {
 		Optional<TaskMessage> op = hbHandler.getMessage();
 		assertArrayEquals(op.get().get(), new Codec().encode(Collector.values));
 	}
-
 }
