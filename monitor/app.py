@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 import logging
+import motor
 import os.path
 import random
 import time
 import tornado.escape
+import tornado.gen
 import tornado.ioloop
 import tornado.httpserver
 import tornado.web
@@ -22,11 +24,14 @@ class Application(tornado.web.Application):
             (r'/', MainHandler),
             (r'/websocket', WebsocketHandler),
         ]
+        self.db = motor.MotorClient().remon
         tornado.web.Application.__init__(self, handlers, **settings)
 
 
 class BaseHandler(tornado.web.RequestHandler):
-    pass
+    @property
+    def db(self):
+        return self.application.db
 
 
 class MainHandler(BaseHandler):
@@ -51,7 +56,7 @@ class MessageQueue:
             client.write_message(message)
 
 
-class WebsocketHandler(tornado.websocket.WebSocketHandler):
+class WebsocketHandler(BaseHandler, tornado.websocket.WebSocketHandler):
     mq = MessageQueue()
 
     def open(self):
@@ -61,12 +66,19 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
         logging.info('Websocket closed')
         WebsocketHandler.mq.unregister(self)
 
+    @tornado.gen.coroutine
     def on_message(self, message):
         data = tornado.escape.json_decode(message)
         if data.get('op') == u'register':
             WebsocketHandler.mq.register(self)
+            cursor = self.db.values.find()
+            while (yield cursor.fetch_next):
+                item = cursor.next_object()
+                item.pop('_id')
+                WebsocketHandler.mq.publish(tornado.escape.json_encode(item))
         else:
             WebsocketHandler.mq.publish(message)
+            yield self.db.values.insert(data)
 
 
 if __name__ == '__main__':
