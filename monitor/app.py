@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 import logging
+import motor
 import os.path
-import pymongo
 import random
 import time
 import tornado.escape
+import tornado.gen
 import tornado.ioloop
 import tornado.httpserver
 import tornado.web
@@ -23,7 +24,7 @@ class Application(tornado.web.Application):
             (r'/', MainHandler),
             (r'/websocket', WebsocketHandler),
         ]
-        self.db = pymongo.Connection().remon
+        self.db = motor.MotorClient().remon
         tornado.web.Application.__init__(self, handlers, **settings)
 
 
@@ -65,17 +66,19 @@ class WebsocketHandler(BaseHandler, tornado.websocket.WebSocketHandler):
         logging.info('Websocket closed')
         WebsocketHandler.mq.unregister(self)
 
+    @tornado.gen.coroutine
     def on_message(self, message):
         data = tornado.escape.json_decode(message)
         if data.get('op') == u'register':
             WebsocketHandler.mq.register(self)
-            history = self.db.values.find()
-            for item in history:
+            cursor = self.db.values.find()
+            while (yield cursor.fetch_next):
+                item = cursor.next_object()
                 item.pop('_id')
                 WebsocketHandler.mq.publish(tornado.escape.json_encode(item))
         else:
             WebsocketHandler.mq.publish(message)
-            self.db.values.insert(data)
+            yield self.db.values.insert(data)
 
 
 if __name__ == '__main__':
