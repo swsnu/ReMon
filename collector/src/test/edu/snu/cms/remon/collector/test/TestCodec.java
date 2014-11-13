@@ -13,8 +13,8 @@ import edu.snu.cms.remon.collector.Metric;
 import edu.snu.cms.remon.collector.Codec;
 import edu.snu.cms.remon.collector.Collector;
 
-/*
- * Unit test code for test Codec class
+/**
+ * Unit test for Codec class 
  */
 public class TestCodec {
 	
@@ -26,17 +26,22 @@ public class TestCodec {
 	public void tearDown() throws Exception {
 	}
 
+	/**
+	 * Unit test for Codec.encode() and Codec.decode()
+	 * Encode and decode a array and
+	 * test that decoded array is same to original array 
+	 */
 	@Test
-	public void testEncodeDecode() { // test for Codec.encode() and Codec.decode()
-		byte[] barray;
+	public void testEncodeDecode() {
+		byte[] bArray;
 		List<Metric> values;
 		
 		values = new ArrayList<>();
-		for(int i = 0; i < 20; i++) {
+		for (int i = 0; i < 20; i++) {
 			values.add(new Metric("Test"+i, 0.5+1));
 		}
-		barray = new Codec().encode(values);
-		List<Metric> decodedvalues = new Codec().decode(barray);
+		bArray = new Codec().encode(values);
+		List<Metric> decodedvalues = new Codec().decode(bArray);
 		assertEquals(decodedvalues, values);
 	}
 
