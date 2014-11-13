@@ -43,7 +43,9 @@ function addValue(tagName, value)
 $(window).load(function() {
     var socket = window['WebSocket'] || window['MozWebSocket'];
     if (!socket) { console.log('Websocket not supported.'); return; }
-    var websocket = new socket('ws://' + document.location.hostname + ':8000/websocket');
+    var port = document.location.port;
+    var address = document.location.hostname + (port.length == 0 ? '' : ':' + port);
+    var websocket = new socket('ws://' + address + '/websocket');
     websocket.onopen = function() {
         console.log('Websocket opened.');
         websocket.send(JSON.stringify({op: 'register'}));
