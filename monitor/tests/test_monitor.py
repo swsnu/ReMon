@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-from datetime import timedelta
+import tornado.ioloop
 from tornado import gen
 from tornado.escape import json_encode, json_decode
 from tornado.websocket import websocket_connect
 from tornado.testing import AsyncHTTPTestCase, gen_test
+from datetime import timedelta
 
 from app import Application
 
@@ -30,6 +31,9 @@ class WebsocketHandlerTest(AsyncHTTPTestCase):
 
     def get_app(self):
         return Application()
+
+    def get_new_ioloop(self):
+        return tornado.ioloop.IOLoop.instance()
 
     @gen.coroutine
     def ws_connect(self):
