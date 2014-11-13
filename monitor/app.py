@@ -17,6 +17,7 @@ define('mongo_uri', default='mongodb://localhost:27017/remon', type=str)
 
 
 class Application(tornado.web.Application):
+
     def __init__(self):
         settings = {
             'static_path': os.path.join(os.path.dirname(__file__), 'static'),
@@ -31,11 +32,13 @@ class Application(tornado.web.Application):
 
 
 class MainHandler(tornado.web.RequestHandler):
+
     def get(self):
         self.render('index.html')
 
 
 class MessageQueue:
+
     def __init__(self):
         self.subscribers = set()
 
@@ -70,7 +73,7 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
         data = tornado.escape.json_decode(message)
 
-        if data.get('op') == None:
+        if data.get('op') is None:
             WebsocketHandler.mq.publish(message)
             yield self.db.values.insert(data)
 
@@ -87,9 +90,9 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.INFO)
+    logging.basicConfig(level=logging.INFO,
+                        format="%(asctime)s %(levelname)s %(message)s")
     tornado.options.parse_command_line()
     httpserver = tornado.httpserver.HTTPServer(Application())
     httpserver.listen(options.port)
     tornado.ioloop.IOLoop().instance().start()
-
