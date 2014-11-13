@@ -30,13 +30,7 @@ class Application(tornado.web.Application):
         tornado.web.Application.__init__(self, handlers, **settings)
 
 
-class BaseHandler(tornado.web.RequestHandler):
-    @property
-    def db(self):
-        return self.application.db
-
-
-class MainHandler(BaseHandler):
+class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.render('index.html')
 
@@ -58,8 +52,12 @@ class MessageQueue:
             client.write_message(message)
 
 
-class WebsocketHandler(BaseHandler, tornado.websocket.WebSocketHandler):
+class WebsocketHandler(tornado.websocket.WebSocketHandler):
     mq = MessageQueue()
+
+    @property
+    def db(self):
+        return self.application.db
 
     def open(self):
         logging.info('Websocket opened')
