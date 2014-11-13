@@ -1,7 +1,7 @@
 #!/usr/bin/env python
+from datetime import timedelta
 from tornado import gen
 from tornado.escape import json_encode
-from tornado.ioloop import TimeoutError
 from tornado.websocket import websocket_connect
 from tornado.testing import AsyncHTTPTestCase, gen_test
 
@@ -9,7 +9,7 @@ from app import Application
 
 
 class MainHandlerTest(AsyncHTTPTestCase):
-    
+
     def get_app(self):
         return Application()
 
@@ -48,3 +48,15 @@ class WebsocketHandlerTest(AsyncHTTPTestCase):
             self.assertEqual(response, message)
         ws.close()
 
+    @gen_test
+    def test_echo_without_register(self):
+        ws = yield self.ws_connect()
+        message = json_encode({'key': 'younha'})
+        ws.write_message(message)
+        try:
+            wait_time = timedelta(seconds=1.0)
+            response = yield gen.with_timeout(wait_time, ws.read_message())
+        except gen.TimeoutError:
+            ws.close()
+        else:
+            raise AssertionError
