@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import logging
 import motor
-import os.path
+import os
 import random
 import time
 import tornado.escape
@@ -24,7 +24,8 @@ class Application(tornado.web.Application):
             (r'/', MainHandler),
             (r'/websocket', WebsocketHandler),
         ]
-        self.db = motor.MotorClient().remon
+        mongo = os.environ.get('MONGOLAB_URI', 'mongodb://localhost:27017')
+        self.db = motor.MotorClient(mongo).remon
         tornado.web.Application.__init__(self, handlers, **settings)
 
 
