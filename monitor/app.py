@@ -71,16 +71,21 @@ class WebsocketHandler(BaseHandler, tornado.websocket.WebSocketHandler):
     @tornado.gen.coroutine
     def on_message(self, message):
         data = tornado.escape.json_decode(message)
-        if data.get('op') == u'register':
+
+        if data.get('op') == None:
+            WebsocketHandler.mq.publish(message)
+            yield self.db.values.insert(data)
+
+        elif data.get('op') == u'register':
             WebsocketHandler.mq.register(self)
             cursor = self.db.values.find()
             while (yield cursor.fetch_next):
                 item = cursor.next_object()
                 item.pop('_id')
                 WebsocketHandler.mq.publish(tornado.escape.json_encode(item))
-        else:
-            WebsocketHandler.mq.publish(message)
-            yield self.db.values.insert(data)
+
+        elif data.get('op') == u'clear':
+            yield self.db.values.remove()
 
 
 if __name__ == '__main__':
