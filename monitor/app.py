@@ -79,6 +79,8 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
 
         elif data.get('op') == u'register':
             WebsocketHandler.mq.register(self)
+
+        elif data.get('op') == u'history':
             cursor = self.db.values.find()
             while (yield cursor.fetch_next):
                 item = cursor.next_object()
