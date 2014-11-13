@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Created by yunseong on 11/6/14.
+ * Codec which converts between Metrics and JSON string
  */
 public class Codec implements org.apache.reef.io.serialization.Codec<List<Metric>> {
 
@@ -15,7 +15,7 @@ public class Codec implements org.apache.reef.io.serialization.Codec<List<Metric
   public byte[] encode(List<Metric> obj) {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      MetricSerializer.toStream(new Metrics(obj), baos);
+      MetricSerializer.toStream(new Metrics("appId", obj), baos);
     } catch (IOException e) {
       e.printStackTrace();
     }

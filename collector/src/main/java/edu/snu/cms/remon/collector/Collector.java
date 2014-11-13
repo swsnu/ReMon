@@ -46,14 +46,11 @@ public final class Collector {
    * Collects data when the size is up to 30 and
    * flushes the collection there reaches 30 items in the list.
    * @param tag
-   * @param i
+   * @param value
    */
-  public synchronized static void putData(final String tag, final double i) {
-    if (values.size() < 30) {
-      values.add(new Metric(tag, i));
-    } else {
-      values.clear();
-    }
+  public synchronized static void putData(final String sourceId, final String tag, final double value) {
+    final long time = System.currentTimeMillis();
+    values.add(new Metric(sourceId, tag, time, value));
   }
 
   public static class heartbeatHandler implements TaskMessageSource {
@@ -70,6 +67,7 @@ public final class Collector {
     public Optional<TaskMessage> getMessage() {
       final TaskMessage msg =  TaskMessage.from(this.toString(),
         new Codec().encode(values));
+      values.clear();
       return Optional.of(msg);
     }
   }
@@ -91,7 +89,8 @@ public final class Collector {
      */
     @Override
     public void onNext(org.apache.reef.driver.task.TaskMessage value) {
-      final Metrics metrics = new Metrics(new Codec().decode(value.get()));
+      // TODO Specify App1 to be the applicationId of this app
+      final Metrics metrics = new Metrics("App1", new Codec().decode(value.get()));
       final ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
       try {

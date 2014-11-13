@@ -29,7 +29,7 @@ public class TestCodec {
 
     values = new ArrayList<>();
     for (int i = 0; i < 20; i++) {
-      values.add(new Metric("Test" + i, 0.5 + 1));
+      values.add(new Metric("Src1", "Test" + i, (long)i, 0.5 + i));
     }
     bArray = new Codec().encode(values);
     List<Metric> decodedvalues = new Codec().decode(bArray);
