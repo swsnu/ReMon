@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import logging
 import motor
-import os
+import os.path
 import random
 import time
 import tornado.escape
@@ -13,9 +13,11 @@ import tornado.websocket
 from tornado.options import define, options
 
 define('port', default=8000, help='run on the given port', type=int)
+define('mongo_uri', default='mongodb://localhost:27017/remon', type=str)
 
 
 class Application(tornado.web.Application):
+
     def __init__(self):
         settings = {
             'static_path': os.path.join(os.path.dirname(__file__), 'static'),
@@ -24,24 +26,19 @@ class Application(tornado.web.Application):
             (r'/', MainHandler),
             (r'/websocket', WebsocketHandler),
         ]
-        mongo = os.environ.get('MONGOLAB_URI', 'mongodb://localhost:27017/remon')
-        db_name = mongo.rsplit('/', 1)[-1]
-        self.db = motor.MotorClient(mongo)[db_name]
+        db_name = options.mongo_uri.rsplit('/', 1)[-1]
+        self.db = motor.MotorClient(options.mongo_uri)[db_name]
         tornado.web.Application.__init__(self, handlers, **settings)
 
 
-class BaseHandler(tornado.web.RequestHandler):
-    @property
-    def db(self):
-        return self.application.db
+class MainHandler(tornado.web.RequestHandler):
 
-
-class MainHandler(BaseHandler):
     def get(self):
         self.render('index.html')
 
 
 class MessageQueue:
+
     def __init__(self):
         self.subscribers = set()
 
@@ -58,8 +55,12 @@ class MessageQueue:
             client.write_message(message)
 
 
-class WebsocketHandler(BaseHandler, tornado.websocket.WebSocketHandler):
+class WebsocketHandler(tornado.websocket.WebSocketHandler):
     mq = MessageQueue()
+
+    @property
+    def db(self):
+        return self.application.db
 
     def open(self):
         logging.info('Websocket opened')
@@ -71,22 +72,29 @@ class WebsocketHandler(BaseHandler, tornado.websocket.WebSocketHandler):
     @tornado.gen.coroutine
     def on_message(self, message):
         data = tornado.escape.json_decode(message)
-        if data.get('op') == u'register':
-            WebsocketHandler.mq.register(self)
-            cursor = self.db.values.find()
-            while (yield cursor.fetch_next):
-                item = cursor.next_object()
-                item.pop('_id')
-                WebsocketHandler.mq.publish(tornado.escape.json_encode(item))
-        else:
+
+        if data.get('op') is None:
             WebsocketHandler.mq.publish(message)
             yield self.db.values.insert(data)
 
+        elif data.get('op') == u'register':
+            WebsocketHandler.mq.register(self)
+
+        elif data.get('op') == u'history':
+            cursor = self.db.values.find()
+            while (yield cursor.fetch_next):
+                item = cursor.next_object()
+                item.pop('_id', None)
+                WebsocketHandler.mq.publish(tornado.escape.json_encode(item))
+
+        elif data.get('op') == u'clear':
+            yield self.db.values.remove()
+
 
 if __name__ == '__main__':
-    logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.INFO)
+    logging.basicConfig(level=logging.INFO,
+                        format="%(asctime)s %(levelname)s %(message)s")
     tornado.options.parse_command_line()
     httpserver = tornado.httpserver.HTTPServer(Application())
     httpserver.listen(options.port)
     tornado.ioloop.IOLoop().instance().start()
-
