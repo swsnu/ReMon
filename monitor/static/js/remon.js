@@ -1,5 +1,6 @@
 var graphs = {};
 var lookup = {};
+var max_size = 40;
 
 function addGraph(tagName) {
     if (tagName in lookup == false) {
@@ -36,8 +37,18 @@ function addValue(tagName, value)
         addGraph(tagName);
     var data = graphs[tagName].series[0].data;
     data.push({ x: data.length, y: value });
+    if (data.length > max_size)
+        shift_data(tagName, data.length - max_size);
     graphs[tagName].update();
     $('#value' + lookup[tagName]).text(value);
+}
+
+function shift_data(tagName, offset)
+{
+    var data = graphs[tagName].series[0].data;
+    for (var i in data)
+        data[i].x -= offset;
+    graphs[tagName].series[0].data = data.slice(offset);
 }
 
 $(window).load(function() {
