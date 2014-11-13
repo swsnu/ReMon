@@ -35,7 +35,7 @@ public final class CounterTask implements Task {
   public final byte[] call(final byte[] memento) {
     for (int i = 0; i < 1000; i++) {
       // Register to Collector to track the changes of a variable.
-      Collector.putData("CounterTask#call#i", i);
+      Collector.putData("getEvalId", "CounterTask#call#i", i);
       if (i == 999) {
         i = 0;
       }

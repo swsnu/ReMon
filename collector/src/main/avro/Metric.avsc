@@ -5,7 +5,9 @@
   "name" : "Metric",
   "fields" :
   [
+    { "name" : "source_id", "type" : "string" },
     { "name" : "tag", "type" : "string" },
+    { "name" : "time", "type" : "long" },
     { "name" : "value", "type" : "double" }
   ]
 },
@@ -15,6 +17,10 @@
   "name" : "Metrics",
   "fields" :
   [
+    {
+      "name" : "app_id",
+      "type" : "string"
+    },
     {
       "name" : "metrics",
       "type" :
