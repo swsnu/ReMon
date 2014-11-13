@@ -24,8 +24,9 @@ class Application(tornado.web.Application):
             (r'/', MainHandler),
             (r'/websocket', WebsocketHandler),
         ]
-        mongo = os.environ.get('MONGOLAB_URI', 'mongodb://localhost:27017')
-        self.db = motor.MotorClient(mongo).remon
+        mongo = os.environ.get('MONGOLAB_URI', 'mongodb://localhost:27017/remon')
+        db_name = mongo.rsplit('/', 1)[-1]
+        self.db = motor.MotorClient(mongo)[db_name]
         tornado.web.Application.__init__(self, handlers, **settings)
 
 
