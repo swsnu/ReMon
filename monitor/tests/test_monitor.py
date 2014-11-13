@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from datetime import timedelta
 from tornado import gen
-from tornado.escape import json_encode
+from tornado.escape import json_encode, json_decode
 from tornado.websocket import websocket_connect
 from tornado.testing import AsyncHTTPTestCase, gen_test
 
@@ -41,19 +41,38 @@ class WebsocketHandlerTest(AsyncHTTPTestCase):
     def test_echo_with_register(self):
         ws = yield self.ws_connect()
         ws.write_message(json_encode({'op': 'register'}))
-        for value in ['younha', 486, u'unicode']:
-            message = json_encode({'key': value})
-            ws.write_message(message)
-            response = yield ws.read_message()
-            self.assertEqual(response, message)
+        message = {
+            'app_id': 'younhaholic',
+            'metrics': [{
+                'source_id': 'younhapia',
+                'tag': 'younha',
+                'time': 1415895132,
+                'value': 486.0,
+            }]
+        }
+        ws.write_message(json_encode(message))
+        response = yield ws.read_message()
+        metric = message['metrics'][0]
+        output = json_decode(response)
+        self.assertEqual(metric.keys(), output.keys())
+        for key in metric.keys():
+            self.assertEqual(metric[key], output[key])
         ws.close()
 
     @gen_test
     def test_echo_without_register(self):
         ws = yield self.ws_connect()
-        message = json_encode({'key': 'younha'})
-        ws.write_message(message)
+        message = {
+            'app_id': 'younhaholic',
+            'metrics': [{
+                'source_id': 'younhapia',
+                'tag': 'younha',
+                'time': 1415895132,
+                'value': 486.0,
+            }]
+        }
+        ws.write_message(json_encode(message))
         with self.assertRaises(gen.TimeoutError) as context:
-            wait_time = timedelta(seconds=1.0)
+            wait_time = timedelta(seconds=0.5)
             response = yield gen.with_timeout(wait_time, ws.read_message())
         ws.close()
