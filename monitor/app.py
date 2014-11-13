@@ -74,8 +74,10 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
         data = tornado.escape.json_decode(message)
 
         if data.get('op') is None:
-            WebsocketHandler.mq.publish(message)
-            yield self.db.values.insert(data)
+            metrics = data['metrics']
+            for item in metrics:
+                WebsocketHandler.mq.publish(tornado.escape.json_encode(item))
+            yield self.db.values.insert(metrics)
 
         elif data.get('op') == u'register':
             WebsocketHandler.mq.register(self)
