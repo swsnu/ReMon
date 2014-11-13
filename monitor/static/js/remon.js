@@ -1,5 +1,6 @@
 var graphs = {};
 var lookup = {};
+var max_size = 40;
 
 function addGraph(tagName) {
     if (tagName in lookup == false) {
@@ -36,8 +37,18 @@ function addValue(tagName, value)
         addGraph(tagName);
     var data = graphs[tagName].series[0].data;
     data.push({ x: data.length, y: value });
+    if (data.length > max_size)
+        shift_data(tagName, data.length - max_size);
     graphs[tagName].update();
     $('#value' + lookup[tagName]).text(value);
+}
+
+function shift_data(tagName, offset)
+{
+    var data = graphs[tagName].series[0].data;
+    for (var i in data)
+        data[i].x -= offset;
+    graphs[tagName].series[0].data = data.slice(offset);
 }
 
 $(window).load(function() {
@@ -49,14 +60,13 @@ $(window).load(function() {
     websocket.onopen = function() {
         console.log('Websocket opened.');
         websocket.send(JSON.stringify({op: 'register'}));
+        websocket.send(JSON.stringify({op: 'history'}));
     }
     websocket.onclose = function() {
         console.log('Websocket closed.');
     }
     websocket.onmessage = function(event) {
         var data = JSON.parse(event.data);
-        for (var i in data.metrics) {
-            addValue(data.metrics[i].tag, data.metrics[i].value);
-        }
+        addValue(data.tag, data.value);
     }
 });
