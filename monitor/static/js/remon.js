@@ -49,14 +49,13 @@ $(window).load(function() {
     websocket.onopen = function() {
         console.log('Websocket opened.');
         websocket.send(JSON.stringify({op: 'register'}));
+        websocket.send(JSON.stringify({op: 'history'}));
     }
     websocket.onclose = function() {
         console.log('Websocket closed.');
     }
     websocket.onmessage = function(event) {
         var data = JSON.parse(event.data);
-        for (var i in data.metrics) {
-            addValue(data.metrics[i].tag, data.metrics[i].value);
-        }
+        addValue(data.tag, data.value);
     }
 });
