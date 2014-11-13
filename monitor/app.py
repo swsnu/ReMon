@@ -82,7 +82,7 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             cursor = self.db.values.find()
             while (yield cursor.fetch_next):
                 item = cursor.next_object()
-                item.pop('_id')
+                item.pop('_id', None)
                 WebsocketHandler.mq.publish(tornado.escape.json_encode(item))
 
         elif data.get('op') == u'clear':
