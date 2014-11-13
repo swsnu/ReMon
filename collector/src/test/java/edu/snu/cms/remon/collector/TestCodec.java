@@ -1,4 +1,5 @@
-package edu.snu.cms.remon.collector.test;
+package edu.snu.cms.remon.collector;
+
 
 import static org.junit.Assert.*;
 
@@ -17,15 +18,6 @@ import edu.snu.cms.remon.collector.Collector;
  * Unit test for Codec class
  */
 public class TestCodec {
-
-  @Before
-  public void setUp() throws Exception {
-  }
-
-  @After
-  public void tearDown() throws Exception {
-  }
-
   /**
    * Unit test for Codec.encode() and Codec.decode() Encode and decode a array
    * and test that decoded array is same to original array
@@ -43,5 +35,4 @@ public class TestCodec {
     List<Metric> decodedvalues = new Codec().decode(bArray);
     assertEquals(decodedvalues, values);
   }
-
 }

@@ -1,4 +1,5 @@
-package edu.snu.cms.remon.collector.test;
+package edu.snu.cms.remon.collector;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,16 +19,6 @@ import edu.snu.cms.remon.collector.Collector;
  * Unit test for Collector class
  */
 public class TestCollector {
-
-  @Before
-  public void setUp() throws Exception {
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    Collector.values.clear();
-  }
-
   /**
    * Unit test for Collector.putData() Test the size of Collector.values after
    * call Collector.putData
