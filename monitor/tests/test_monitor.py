@@ -25,3 +25,26 @@ class MainHandlerTest(AsyncHTTPTestCase):
         response = self.fetch(r'/static/js/remon.js')
         assert(response.code == 200)
 
+
+class WebsocketHandlerTest(AsyncHTTPTestCase):
+
+    def get_app(self):
+        return Application()
+
+    @gen.coroutine
+    def ws_connect(self):
+        address = 'ws://localhost:%d/websocket' % self.get_http_port()
+        ws = yield websocket_connect(address, io_loop=self.io_loop)
+        raise gen.Return(ws)
+
+    @gen_test
+    def test_echo_with_register(self):
+        ws = yield self.ws_connect()
+        ws.write_message(json_encode({'op': 'register'}))
+        for value in ['younha', 486, u'unicode']:
+            message = json_encode({'key': value})
+            ws.write_message(message)
+            response = yield ws.read_message()
+            self.assertEqual(response, message)
+        ws.close()
+
