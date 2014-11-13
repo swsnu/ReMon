@@ -15,15 +15,15 @@ class MainHandlerTest(AsyncHTTPTestCase):
 
     def test_main_page(self):
         response = self.fetch(r'/')
-        assert(response.code == 200)
+        self.assertEqual(response.code, 200)
 
     def test_not_found(self):
         response = self.fetch(r'/i-am-lost')
-        assert(response.code == 404)
+        self.assertEqual(response.code, 404)
 
     def test_static_file(self):
         response = self.fetch(r'/static/js/remon.js')
-        assert(response.code == 200)
+        self.assertEqual(response.code, 200)
 
 
 class WebsocketHandlerTest(AsyncHTTPTestCase):
@@ -53,10 +53,7 @@ class WebsocketHandlerTest(AsyncHTTPTestCase):
         ws = yield self.ws_connect()
         message = json_encode({'key': 'younha'})
         ws.write_message(message)
-        try:
+        with self.assertRaises(gen.TimeoutError) as context:
             wait_time = timedelta(seconds=1.0)
             response = yield gen.with_timeout(wait_time, ws.read_message())
-        except gen.TimeoutError:
-            ws.close()
-        else:
-            raise AssertionError
+        ws.close()
