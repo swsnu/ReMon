@@ -35,6 +35,25 @@ class WebsocketHandlerTest(AsyncHTTPTestCase):
     def get_new_ioloop(self):
         return tornado.ioloop.IOLoop.instance()
 
+    def make_sample_message(self):
+        message = {
+            'app_id': 'younhaholic',
+            'metrics': [{
+                'source_id': 'younhapia',
+                'tag': 'younha',
+                'time': 1415895132,
+                'value': 486.0,
+            }]
+        }
+        return message
+
+    def check_sample_message(self, output):
+        message = self.make_sample_message()
+        metric = message['metrics'][0]
+        self.assertEqual(metric.keys(), output.keys())
+        for key in metric.keys():
+            self.assertEqual(metric[key], output[key])
+
     @gen.coroutine
     def ws_connect(self):
         address = 'ws://localhost:%d/websocket' % self.get_http_port()
@@ -45,38 +64,43 @@ class WebsocketHandlerTest(AsyncHTTPTestCase):
     def test_echo_with_register(self):
         ws = yield self.ws_connect()
         ws.write_message(json_encode({'op': 'register'}))
-        message = {
-            'app_id': 'younhaholic',
-            'metrics': [{
-                'source_id': 'younhapia',
-                'tag': 'younha',
-                'time': 1415895132,
-                'value': 486.0,
-            }]
-        }
+
+        message = self.make_sample_message()
         ws.write_message(json_encode(message))
-        response = yield ws.read_message()
-        metric = message['metrics'][0]
-        output = json_decode(response)
-        self.assertEqual(metric.keys(), output.keys())
-        for key in metric.keys():
-            self.assertEqual(metric[key], output[key])
+
+        output = json_decode((yield ws.read_message()))
+        self.check_sample_message(output)
+
         ws.close()
 
     @gen_test
     def test_echo_without_register(self):
         ws = yield self.ws_connect()
-        message = {
-            'app_id': 'younhaholic',
-            'metrics': [{
-                'source_id': 'younhapia',
-                'tag': 'younha',
-                'time': 1415895132,
-                'value': 486.0,
-            }]
-        }
+
+        message = self.make_sample_message()
         ws.write_message(json_encode(message))
+
         with self.assertRaises(gen.TimeoutError) as context:
             wait_time = timedelta(seconds=0.5)
             response = yield gen.with_timeout(wait_time, ws.read_message())
+
+        ws.close()
+
+    @gen_test
+    def test_history(self):
+        ws = yield self.ws_connect()
+        ws.write_message(json_encode({'op': 'clear'}))
+        ws.write_message(json_encode({'op': 'register'}))
+
+        message = self.make_sample_message()
+        ws.write_message(json_encode(message))
+
+        output = json_decode((yield ws.read_message()))
+        self.check_sample_message(output)
+
+        ws.write_message(json_encode({'op': 'history'}))
+
+        output = json_decode((yield ws.read_message()))
+        self.check_sample_message(output)
+
         ws.close()
