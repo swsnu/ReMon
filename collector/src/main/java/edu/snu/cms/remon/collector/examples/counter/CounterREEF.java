@@ -19,9 +19,11 @@
 package edu.snu.cms.remon.collector.examples.counter;
 
 import edu.snu.cms.remon.collector.Collector;
+import edu.snu.cms.remon.collector.driver.HeartbeatBypassHandler;
 import org.apache.commons.cli.ParseException;
 import org.apache.reef.client.DriverConfiguration;
 import org.apache.reef.client.DriverLauncher;
+import org.apache.reef.client.DriverServiceConfiguration;
 import org.apache.reef.client.LauncherStatus;
 import org.apache.reef.runtime.local.client.LocalRuntimeConfiguration;
 import org.apache.reef.tang.Configuration;
@@ -31,6 +33,7 @@ import org.apache.reef.tang.exceptions.BindException;
 import org.apache.reef.tang.exceptions.InjectionException;
 import org.apache.reef.tang.formats.CommandLine;
 import org.apache.reef.util.EnvironmentUtils;
+import org.apache.reef.webserver.ReefEventStateManager;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,18 +52,35 @@ public final class CounterREEF {
    */
   private static final int JOB_TIMEOUT = 10000; // 10 sec.
 
+
+  /**
+   * @return the configuration for the Collector to track the state
+   */
+  public static Configuration getCollectorConfiguration() {
+    return DriverServiceConfiguration.CONF
+      .set(DriverServiceConfiguration.ON_EVALUATOR_ALLOCATED, ReefEventStateManager.AllocatedEvaluatorStateHandler.class)
+      .set(DriverServiceConfiguration.ON_CONTEXT_ACTIVE, ReefEventStateManager.ActiveContextStateHandler.class)
+      .set(DriverServiceConfiguration.ON_TASK_RUNNING, ReefEventStateManager.TaskRunningStateHandler.class)
+      .set(DriverServiceConfiguration.ON_DRIVER_STARTED, ReefEventStateManager.StartStateHandler.class)
+      .set(DriverServiceConfiguration.ON_DRIVER_STOP, ReefEventStateManager.StopStateHandler.class)
+      .build();
+  }
+
   /**
    * @return the configuration of the HelloREEF driver.
    * @param commandLineConf
    */
   public static Configuration getDriverConfiguration(Configuration commandLineConf) {
-    return Configurations.merge(commandLineConf, DriverConfiguration.CONF
-      .set(DriverConfiguration.GLOBAL_LIBRARIES, EnvironmentUtils.getClassLocation(CounterDriver.class))
-      .set(DriverConfiguration.DRIVER_IDENTIFIER, "CounterREEF")
-      .set(DriverConfiguration.ON_DRIVER_STARTED, CounterDriver.StartHandler.class)
-      .set(DriverConfiguration.ON_EVALUATOR_ALLOCATED, CounterDriver.EvaluatorAllocatedHandler.class)
-      .set(DriverConfiguration.ON_TASK_MESSAGE, Collector.heartbeatBypassHandler.class)
-      .build());
+    return Configurations.merge(
+      commandLineConf,
+      getCollectorConfiguration(),
+      DriverConfiguration.CONF
+        .set(DriverConfiguration.GLOBAL_LIBRARIES, EnvironmentUtils.getClassLocation(CounterDriver.class))
+        .set(DriverConfiguration.DRIVER_IDENTIFIER, "CounterREEF")
+        .set(DriverConfiguration.ON_DRIVER_STARTED, CounterDriver.StartHandler.class)
+        .set(DriverConfiguration.ON_EVALUATOR_ALLOCATED, CounterDriver.EvaluatorAllocatedHandler.class)
+        .set(DriverConfiguration.ON_TASK_MESSAGE, HeartbeatBypassHandler.class)
+        .build());
   }
 
   public static LauncherStatus runCounterReef(final Configuration runtimeConf, Configuration commandLineConf, final int timeOut)
