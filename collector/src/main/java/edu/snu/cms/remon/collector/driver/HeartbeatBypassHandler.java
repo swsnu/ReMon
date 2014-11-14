@@ -43,12 +43,13 @@ public class HeartbeatBypassHandler implements EventHandler<TaskMessage> {
   public void onNext(org.apache.reef.driver.task.TaskMessage value) {
     final List<Metric> metricList = new Codec().decode(value.get());
 
-    LOG.log(Level.SEVERE, "Evaluators : {0} / Driver Id : {1}", new Object[] {reefStateManager.getEvaluators().size(), reefStateManager.getDriverEndpointIdentifier()});
+    // Add the number of evaluators as a metric
+    metricList.add(new Metric(reefStateManager.getDriverEndpointIdentifier(), "NumEval", System.currentTimeMillis(), (double)reefStateManager.getEvaluators().size()));
     final Set<String> evalIds = reefStateManager.getEvaluators().keySet();
     for (String evalId : evalIds) {
+      // Add memory size of each evaluator as a metric
       final long mem = reefStateManager.getEvaluators().get(evalId).getMemory();
-      metricList.add(new Metric(evalId, "EvalMem", System.currentTimeMillis(), (double)mem));
-      LOG.log(Level.SEVERE, "The memory value is added as " + evalId + "/" + mem);
+      metricList.add(new Metric(reefStateManager.getDriverEndpointIdentifier(), "EvalMem" + "@" + evalId, System.currentTimeMillis(), (double)mem));
     }
 
     final String appId = reefStateManager.getDriverEndpointIdentifier();
