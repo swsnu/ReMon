@@ -19,6 +19,7 @@
 package edu.snu.cms.remon.collector.examples.counter;
 
 import edu.snu.cms.remon.collector.Collector;
+import edu.snu.cms.remon.collector.evaluator.HeartbeatHandler;
 import org.apache.reef.driver.evaluator.AllocatedEvaluator;
 import org.apache.reef.driver.evaluator.EvaluatorRequest;
 import org.apache.reef.driver.evaluator.EvaluatorRequestor;
@@ -78,7 +79,7 @@ public final class CounterDriver {
       final Configuration taskConfiguration = TaskConfiguration.CONF
           .set(TaskConfiguration.IDENTIFIER, "CounterTask")
           .set(TaskConfiguration.TASK, CounterTask.class)
-          .set(TaskConfiguration.ON_SEND_MESSAGE, Collector.heartbeatHandler.class)
+          .set(TaskConfiguration.ON_SEND_MESSAGE, HeartbeatHandler.class)
           .build();
       allocatedEvaluator.submitTask(taskConfiguration);
     }

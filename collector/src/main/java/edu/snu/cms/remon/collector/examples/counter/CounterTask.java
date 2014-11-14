@@ -21,23 +21,27 @@ package edu.snu.cms.remon.collector.examples.counter;
 import edu.snu.cms.remon.collector.Collector;
 import org.apache.reef.task.Task;
 import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * DummyCounterTask. It sleeps 0.1 second for each iteration
  * and count up to 1000
  */
 public final class CounterTask implements Task {
+  List<byte[]> dummyData;
   @Inject
   CounterTask() {
+    dummyData = new ArrayList<>();
   }
 
   @Override
   public final byte[] call(final byte[] memento) {
     for (int i = 0; i < 1000; i++) {
-      // Register to Collector to track the changes of a variable.
-      Collector.putData("getEvalId", "CounterTask#call#i", i);
+      dummyData.add(new byte[1000]);
       if (i == 999) {
         i = 0;
+        dummyData.clear();
       }
       try {
         Thread.sleep(100);

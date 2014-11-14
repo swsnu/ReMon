@@ -1,18 +1,12 @@
 package edu.snu.cms.remon.collector;
 
 
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import edu.snu.cms.remon.collector.Metric;
-import edu.snu.cms.remon.collector.Codec;
-import edu.snu.cms.remon.collector.Collector;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit test for Codec class
