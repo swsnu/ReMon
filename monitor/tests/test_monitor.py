@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-from datetime import timedelta
+import tornado.ioloop
 from tornado import gen
-from tornado.escape import json_encode
+from tornado.escape import json_encode, json_decode
 from tornado.websocket import websocket_connect
 from tornado.testing import AsyncHTTPTestCase, gen_test
+from datetime import timedelta
 
 from app import Application
 
@@ -15,21 +16,43 @@ class MainHandlerTest(AsyncHTTPTestCase):
 
     def test_main_page(self):
         response = self.fetch(r'/')
-        assert(response.code == 200)
+        self.assertEqual(response.code, 200)
 
     def test_not_found(self):
         response = self.fetch(r'/i-am-lost')
-        assert(response.code == 404)
+        self.assertEqual(response.code, 404)
 
     def test_static_file(self):
         response = self.fetch(r'/static/js/remon.js')
-        assert(response.code == 200)
+        self.assertEqual(response.code, 200)
 
 
 class WebsocketHandlerTest(AsyncHTTPTestCase):
 
     def get_app(self):
         return Application()
+
+    def get_new_ioloop(self):
+        return tornado.ioloop.IOLoop.instance()
+
+    def make_sample_message(self):
+        message = {
+            'app_id': 'younhaholic',
+            'metrics': [{
+                'source_id': 'younhapia',
+                'tag': 'younha',
+                'time': 1415895132,
+                'value': 486.0,
+            }]
+        }
+        return message
+
+    def check_sample_message(self, output):
+        message = self.make_sample_message()
+        metric = message['metrics'][0]
+        self.assertEqual(metric.keys(), output.keys())
+        for key in metric.keys():
+            self.assertEqual(metric[key], output[key])
 
     @gen.coroutine
     def ws_connect(self):
@@ -41,22 +64,43 @@ class WebsocketHandlerTest(AsyncHTTPTestCase):
     def test_echo_with_register(self):
         ws = yield self.ws_connect()
         ws.write_message(json_encode({'op': 'register'}))
-        for value in ['younha', 486, u'unicode']:
-            message = json_encode({'key': value})
-            ws.write_message(message)
-            response = yield ws.read_message()
-            self.assertEqual(response, message)
+
+        message = self.make_sample_message()
+        ws.write_message(json_encode(message))
+
+        output = json_decode((yield ws.read_message()))
+        self.check_sample_message(output)
+
         ws.close()
 
     @gen_test
     def test_echo_without_register(self):
         ws = yield self.ws_connect()
-        message = json_encode({'key': 'younha'})
-        ws.write_message(message)
-        try:
-            wait_time = timedelta(seconds=1.0)
+
+        message = self.make_sample_message()
+        ws.write_message(json_encode(message))
+
+        with self.assertRaises(gen.TimeoutError) as context:
+            wait_time = timedelta(seconds=0.5)
             response = yield gen.with_timeout(wait_time, ws.read_message())
-        except gen.TimeoutError:
-            ws.close()
-        else:
-            raise AssertionError
+
+        ws.close()
+
+    @gen_test
+    def test_history(self):
+        ws = yield self.ws_connect()
+        ws.write_message(json_encode({'op': 'clear'}))
+        ws.write_message(json_encode({'op': 'register'}))
+
+        message = self.make_sample_message()
+        ws.write_message(json_encode(message))
+
+        output = json_decode((yield ws.read_message()))
+        self.check_sample_message(output)
+
+        ws.write_message(json_encode({'op': 'history'}))
+
+        output = json_decode((yield ws.read_message()))
+        self.check_sample_message(output)
+
+        ws.close()
