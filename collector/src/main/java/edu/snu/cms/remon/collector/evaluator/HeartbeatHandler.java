@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 public class HeartbeatHandler implements TaskMessageSource {
   private static final Logger LOG = Logger.getLogger(HeartbeatHandler.class.getName());
   private List<Metric> values = new ArrayList<>();
+  private static final String SOURCE_ID = "SourceId";
 
   @Inject
   public HeartbeatHandler() {
@@ -27,13 +28,12 @@ public class HeartbeatHandler implements TaskMessageSource {
    */
   @Override
   public Optional<TaskMessage> getMessage() {
-    // TODO Move those to the right place.
     final Runtime runtime = Runtime.getRuntime();
-    values.add(new Metric("SourceId", "EvaluatorMaxMemory", System.currentTimeMillis(), (double)runtime.maxMemory()));
-    values.add(new Metric("SourceId", "EvaluatorUsedMemory", System.currentTimeMillis(), (double)runtime.totalMemory() - runtime.freeMemory()));
+    values.add(new Metric(SOURCE_ID, "EvaluatorMaxMemory", System.currentTimeMillis(), (double)runtime.maxMemory()));
+    values.add(new Metric(SOURCE_ID, "EvaluatorUsedMemory", System.currentTimeMillis(), (double)runtime.totalMemory() - runtime.freeMemory()));
 
     LOG.log(Level.INFO, "The metric list has sent to the Driver. Size : {0}", values.size());
-    final TaskMessage msg =  TaskMessage.from(this.toString(),
+    final TaskMessage msg =  TaskMessage.from(SOURCE_ID,
       new Codec().encode(values));
     values.clear();
 
