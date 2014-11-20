@@ -9,6 +9,23 @@ from datetime import timedelta
 from app import Application
 
 
+TEST_APP_ID = 'TEST_APP_ID'
+TEST_SOURCE_ID = 'TEST_SOURCE_ID'
+TEST_TAG = 'TEST_TAG'
+TEST_TIME = 1234567890
+TEST_VALUE = 486.
+TEST_METRIC = {
+    'source_id': TEST_SOURCE_ID,
+    'tag': TEST_TAG,
+    'time': TEST_TIME,
+    'value': TEST_VALUE,
+}
+TEST_MESSAGE = {
+    'app_id': TEST_APP_ID,
+    'metrics': [TEST_METRIC],
+}
+
+
 class MainHandlerTest(AsyncHTTPTestCase):
 
     def get_app(self):
@@ -35,18 +52,6 @@ class WebsocketHandlerTest(AsyncHTTPTestCase):
     def get_new_ioloop(self):
         return tornado.ioloop.IOLoop.instance()
 
-    def make_sample_message(self):
-        message = {
-            'app_id': 'younhaholic',
-            'metrics': [{
-                'source_id': 'younhapia',
-                'tag': 'younha',
-                'time': 1415895132,
-                'value': 486.0,
-            }]
-        }
-        return message
-
     @gen.coroutine
     def ws_connect(self):
         address = 'ws://localhost:%d/websocket' % self.get_http_port()
@@ -57,26 +62,18 @@ class WebsocketHandlerTest(AsyncHTTPTestCase):
     def test_echo_with_register(self):
         ws = yield self.ws_connect()
         ws.write_message(json_encode({'op': 'register'}))
-
-        message = self.make_sample_message()
-        ws.write_message(json_encode(message))
-
+        ws.write_message(json_encode(TEST_MESSAGE))
         output = json_decode((yield ws.read_message()))
-        self.assertDictEqual(message['metrics'][0], output)
-
+        self.assertDictEqual(TEST_METRIC, output)
         ws.close()
 
     @gen_test
     def test_echo_without_register(self):
         ws = yield self.ws_connect()
-
-        message = self.make_sample_message()
-        ws.write_message(json_encode(message))
-
+        ws.write_message(json_encode(TEST_MESSAGE))
         with self.assertRaises(gen.TimeoutError) as context:
             wait_time = timedelta(seconds=0.5)
             response = yield gen.with_timeout(wait_time, ws.read_message())
-
         ws.close()
 
     @gen_test
@@ -84,16 +81,10 @@ class WebsocketHandlerTest(AsyncHTTPTestCase):
         ws = yield self.ws_connect()
         ws.write_message(json_encode({'op': 'clear'}))
         ws.write_message(json_encode({'op': 'register'}))
-
-        message = self.make_sample_message()
-        ws.write_message(json_encode(message))
-
+        ws.write_message(json_encode(TEST_MESSAGE))
         output = json_decode((yield ws.read_message()))
-        self.assertDictEqual(message['metrics'][0], output)
-
-        ws.write_message(json_encode({'op': 'history'}))
-
+        self.assertDictEqual(TEST_METRIC, output)
+        ws.write_message(json_encode({'op': 'history', 'app_id': TEST_APP_ID}))
         output = json_decode((yield ws.read_message()))
-        self.assertDictEqual(message['metrics'][0], output)
-
+        self.assertDictEqual(TEST_METRIC, output)
         ws.close()
