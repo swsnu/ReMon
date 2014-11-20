@@ -47,13 +47,6 @@ class WebsocketHandlerTest(AsyncHTTPTestCase):
         }
         return message
 
-    def check_sample_message(self, output):
-        message = self.make_sample_message()
-        metric = message['metrics'][0]
-        self.assertEqual(metric.keys(), output.keys())
-        for key in metric.keys():
-            self.assertEqual(metric[key], output[key])
-
     @gen.coroutine
     def ws_connect(self):
         address = 'ws://localhost:%d/websocket' % self.get_http_port()
@@ -69,7 +62,7 @@ class WebsocketHandlerTest(AsyncHTTPTestCase):
         ws.write_message(json_encode(message))
 
         output = json_decode((yield ws.read_message()))
-        self.check_sample_message(output)
+        self.assertDictEqual(message['metrics'][0], output)
 
         ws.close()
 
@@ -96,11 +89,11 @@ class WebsocketHandlerTest(AsyncHTTPTestCase):
         ws.write_message(json_encode(message))
 
         output = json_decode((yield ws.read_message()))
-        self.check_sample_message(output)
+        self.assertDictEqual(message['metrics'][0], output)
 
         ws.write_message(json_encode({'op': 'history'}))
 
         output = json_decode((yield ws.read_message()))
-        self.check_sample_message(output)
+        self.assertDictEqual(message['metrics'][0], output)
 
         ws.close()
