@@ -99,6 +99,9 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             app_id = data['app_id']
             yield self.db[app_id].remove()
 
+        else:
+            self.mq.publish(tornado.escape.json_encode({'error': True}))
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO,
