@@ -74,23 +74,26 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
         data = tornado.escape.json_decode(message)
 
         if data.get('op') is None:
+            app_id = data['app_id']
             metrics = data['metrics']
             for item in metrics:
                 WebsocketHandler.mq.publish(tornado.escape.json_encode(item))
-            yield self.db.values.insert(metrics)
+            yield self.db[app_id].insert(metrics)
 
         elif data.get('op') == u'register':
             WebsocketHandler.mq.register(self)
 
         elif data.get('op') == u'history':
-            cursor = self.db.values.find()
+            app_id = data['app_id']
+            cursor = self.db[app_id].find()
             while (yield cursor.fetch_next):
                 item = cursor.next_object()
                 item.pop('_id', None)
                 WebsocketHandler.mq.publish(tornado.escape.json_encode(item))
 
         elif data.get('op') == u'clear':
-            yield self.db.values.remove()
+            app_id = data['app_id']
+            yield self.db[app_id].remove()
 
 
 if __name__ == '__main__':
