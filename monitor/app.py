@@ -28,6 +28,7 @@ class Application(tornado.web.Application):
         ]
         db_name = options.mongo_uri.rsplit('/', 1)[-1]
         self.db = motor.MotorClient(options.mongo_uri)[db_name]
+        self.mq = MessageQueue()
         tornado.web.Application.__init__(self, handlers, **settings)
 
 
@@ -37,7 +38,7 @@ class MainHandler(tornado.web.RequestHandler):
         self.render('index.html')
 
 
-class MessageQueue:
+class MessageQueue(object):
 
     def __init__(self):
         self.subscribers = set()
@@ -56,18 +57,21 @@ class MessageQueue:
 
 
 class WebsocketHandler(tornado.websocket.WebSocketHandler):
-    mq = MessageQueue()
 
     @property
     def db(self):
         return self.application.db
+
+    @property
+    def mq(self):
+        return self.application.mq
 
     def open(self):
         logging.info('Websocket opened')
 
     def on_close(self):
         logging.info('Websocket closed')
-        WebsocketHandler.mq.unregister(self)
+        self.mq.unregister(self)
 
     @tornado.gen.coroutine
     def on_message(self, message):
@@ -77,11 +81,11 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             app_id = data['app_id']
             metrics = data['metrics']
             for item in metrics:
-                WebsocketHandler.mq.publish(tornado.escape.json_encode(item))
+                self.mq.publish(tornado.escape.json_encode(item))
             yield self.db[app_id].insert(metrics)
 
         elif data.get('op') == u'register':
-            WebsocketHandler.mq.register(self)
+            self.mq.register(self)
 
         elif data.get('op') == u'history':
             app_id = data['app_id']
@@ -89,7 +93,7 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             while (yield cursor.fetch_next):
                 item = cursor.next_object()
                 item.pop('_id', None)
-                WebsocketHandler.mq.publish(tornado.escape.json_encode(item))
+                self.mq.publish(tornado.escape.json_encode(item))
 
         elif data.get('op') == u'clear':
             app_id = data['app_id']
