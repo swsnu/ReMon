@@ -26,9 +26,6 @@ RemonSocket.prototype.send = function(data) {
 
 RemonSocket.prototype.onOpen = function() {
     console.log('Websocket opened.');
-    var appId = 'TEST_APP_ID';
-    this.send({ op: 'subscribe', app_id: appId });
-    this.send({ op: 'history', app_id: appId });
     this.send({ op: 'list' });
 }
 
@@ -97,7 +94,7 @@ RemonGraph.prototype.addValue = function(value) {
     }
     this.graph.series[0].data = this.data;
     this.graph.update();
-    document.getElementById(this.getValueId()).innerText = value;
+    $('#' + this.getValueId()).text(value);
 }
 
 RemonGraph.prototype.shiftData = function(offset) {
@@ -110,8 +107,10 @@ RemonGraph.prototype.shiftData = function(offset) {
 
 function RemonDashboard(params) {
     params = params || {};
+    this.appList = params.appList || [];
     this.appId = params.appId || '';
     this.graphs = params.graphs || {};
+    this.rs = new RemonSocket({ callback: this.callback.bind(this) });
 }
 
 RemonDashboard.prototype.addGraph = function(tagName) {
@@ -131,21 +130,46 @@ RemonDashboard.prototype.addValue = function(tagName, value) {
     graph.addValue(value);
 }
 
+RemonDashboard.prototype.showAppList = function() {
+    $('#dashboard').empty();
+    var html = '';
+    html += '<h2>App List</h2>';
+    html += '<ul>';
+    for (var i in this.appList) {
+        var appId = this.appList[i];
+        html += '<li><a href="javascript:dashboard.changeApp(\'' + appId + '\')">';
+        html += appId + '</a></li>';
+    }
+    html += '</ul>';
+    $('#dashboard').html(html);
+}
+
+RemonDashboard.prototype.changeApp = function(appId) {
+    $('#dashboard').empty();
+    this.rs.send({ op: 'unsubscribe', app_id: this.appId });
+    this.appId = appId;
+    this.graphs = {};
+    this.rs.send({ op: 'subscribe', app_id: appId });
+    this.rs.send({ op: 'history', app_id: appId });
+}
+
 RemonDashboard.prototype.callback = function(data) {
     if (data.op === undefined && data.tag !== undefined) {
         this.addValue(data.tag, data.value);
     }
     else if (data.op === 'list') {
+        this.appList = data.app_list;
+        this.showAppList();
     }
 }
 
+
+var dashboard;
 
 $(document).ready(function() {
     if (!socket) {
         console.log('Websocket not supported.');
         return;
     }
-    var remonDashboard = new RemonDashboard();
-    var callback = remonDashboard.callback.bind(remonDashboard);
-    var remonSocket = new RemonSocket({ callback: callback });
+    dashboard = new RemonDashboard();
 });
