@@ -18,8 +18,7 @@
  */
 package edu.snu.cms.remon.collector.examples.counter;
 
-import edu.snu.cms.remon.collector.Collector;
-import edu.snu.cms.remon.collector.evaluator.HeartbeatHandler;
+import edu.snu.cms.remon.collector.evaluator.RemonLogger;
 import org.apache.reef.driver.evaluator.AllocatedEvaluator;
 import org.apache.reef.driver.evaluator.EvaluatorRequest;
 import org.apache.reef.driver.evaluator.EvaluatorRequestor;
@@ -61,10 +60,10 @@ public final class CounterDriver {
     @Override
     public void onNext(final StartTime startTime) {
       CounterDriver.this.requestor.submit(EvaluatorRequest.newBuilder()
-          .setNumber(1)
-          .setMemory(64)
-          .setNumberOfCores(1)
-          .build());
+        .setNumber(1)
+        .setMemory(64)
+        .setNumberOfCores(1)
+        .build());
       LOG.log(Level.INFO, "Requested Evaluator.");
     }
   }
@@ -77,10 +76,10 @@ public final class CounterDriver {
     public void onNext(final AllocatedEvaluator allocatedEvaluator) {
       LOG.log(Level.INFO, "Submitting CounterREEF task to AllocatedEvaluator: {0}", allocatedEvaluator);
       final Configuration taskConfiguration = TaskConfiguration.CONF
-          .set(TaskConfiguration.IDENTIFIER, "CounterTask")
-          .set(TaskConfiguration.TASK, CounterTask.class)
-          .set(TaskConfiguration.ON_SEND_MESSAGE, HeartbeatHandler.class)
-          .build();
+        .set(TaskConfiguration.IDENTIFIER, "CounterTask")
+        .set(TaskConfiguration.TASK, CounterTask.class)
+        .set(TaskConfiguration.ON_SEND_MESSAGE, RemonLogger.class)
+        .build();
       allocatedEvaluator.submitTask(taskConfiguration);
     }
   }
