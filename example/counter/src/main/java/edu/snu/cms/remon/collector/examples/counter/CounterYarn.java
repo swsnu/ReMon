@@ -19,7 +19,7 @@
 package edu.snu.cms.remon.collector.examples.counter;
 
 import edu.snu.cms.remon.collector.Collector;
-import edu.snu.cms.remon.collector.driver.HeartbeatBypassHandler;
+import edu.snu.cms.remon.collector.driver.RemonMessenger;
 import org.apache.commons.cli.ParseException;
 import org.apache.reef.client.DriverConfiguration;
 import org.apache.reef.client.DriverLauncher;
@@ -57,7 +57,7 @@ public final class CounterYarn {
       .set(DriverConfiguration.DRIVER_IDENTIFIER, "CounterREEF")
       .set(DriverConfiguration.ON_DRIVER_STARTED, CounterDriver.StartHandler.class)
       .set(DriverConfiguration.ON_EVALUATOR_ALLOCATED, CounterDriver.EvaluatorAllocatedHandler.class)
-      .set(DriverConfiguration.ON_TASK_MESSAGE, HeartbeatBypassHandler.class)
+      .set(DriverConfiguration.ON_TASK_MESSAGE, RemonMessenger.class)
       .build());
   }
 

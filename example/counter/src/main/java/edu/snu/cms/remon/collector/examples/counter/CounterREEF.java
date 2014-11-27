@@ -19,7 +19,7 @@
 package edu.snu.cms.remon.collector.examples.counter;
 
 import edu.snu.cms.remon.collector.Collector;
-import edu.snu.cms.remon.collector.driver.HeartbeatBypassHandler;
+import edu.snu.cms.remon.collector.driver.RemonMessenger;
 import org.apache.commons.cli.ParseException;
 import org.apache.reef.client.DriverConfiguration;
 import org.apache.reef.client.DriverLauncher;
@@ -28,10 +28,8 @@ import org.apache.reef.client.LauncherStatus;
 import org.apache.reef.runtime.local.client.LocalRuntimeConfiguration;
 import org.apache.reef.tang.Configuration;
 import org.apache.reef.tang.Configurations;
-import org.apache.reef.tang.Tang;
 import org.apache.reef.tang.exceptions.BindException;
 import org.apache.reef.tang.exceptions.InjectionException;
-import org.apache.reef.tang.formats.CommandLine;
 import org.apache.reef.util.EnvironmentUtils;
 import org.apache.reef.webserver.ReefEventStateManager;
 
@@ -79,7 +77,7 @@ public final class CounterREEF {
         .set(DriverConfiguration.DRIVER_IDENTIFIER, "CounterREEF")
         .set(DriverConfiguration.ON_DRIVER_STARTED, CounterDriver.StartHandler.class)
         .set(DriverConfiguration.ON_EVALUATOR_ALLOCATED, CounterDriver.EvaluatorAllocatedHandler.class)
-        .set(DriverConfiguration.ON_TASK_MESSAGE, HeartbeatBypassHandler.class)
+        .set(DriverConfiguration.ON_TASK_MESSAGE, RemonMessenger.class)
         .build());
   }
 
