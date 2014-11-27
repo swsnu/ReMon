@@ -19,6 +19,8 @@
 package edu.snu.cms.remon.collector.examples.counter;
 
 import edu.snu.cms.remon.collector.Collector;
+import edu.snu.cms.remon.collector.evaluator.Logger2;
+import edu.snu.cms.remon.collector.evaluator.RemonLogger;
 import org.apache.reef.task.Task;
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -29,6 +31,9 @@ import java.util.List;
  * and count up to 1000
  */
 public final class CounterTask implements Task {
+  private static final RemonLogger log = RemonLogger.getLogger();
+  private static final Logger2 log2 = Logger2.getLogger();
+
   List<byte[]> dummyData;
   @Inject
   CounterTask() {
@@ -38,13 +43,16 @@ public final class CounterTask implements Task {
   @Override
   public final byte[] call(final byte[] memento) {
     for (int i = 0; i < 1000; i++) {
+      log.log(""+i);
+      log2.log(""+i);
+
       dummyData.add(new byte[1000]);
       if (i == 999) {
         i = 0;
         dummyData.clear();
       }
       try {
-        Thread.sleep(100);
+        Thread.sleep(1000);
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
