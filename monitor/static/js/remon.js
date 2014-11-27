@@ -1,6 +1,8 @@
+var channels = [];
 var graphs = {};
 var lookup = {};
 var max_size = 40;
+var websocket;
 
 function addGraph(tagName) {
     if (tagName in lookup == false) {
@@ -31,8 +33,7 @@ function addGraph(tagName) {
     }
 }
 
-function addValue(tagName, value)
-{
+function addValue(tagName, value) {
     if (tagName in lookup == false)
         addGraph(tagName);
     var data = graphs[tagName].series[0].data;
@@ -43,12 +44,19 @@ function addValue(tagName, value)
     $('#value' + lookup[tagName]).text(value);
 }
 
-function shift_data(tagName, offset)
-{
+function shift_data(tagName, offset) {
     var data = graphs[tagName].series[0].data;
     for (var i in data)
         data[i].x -= offset;
     graphs[tagName].series[0].data = data.slice(offset);
+}
+
+function subscribe(appId) {
+    websocket.send(JSON.stringify({op: 'subscribe', app_id: appId}));
+}
+
+function history(appId) {
+    websocket.send(JSON.stringify({op: 'history', app_id: appId}));
 }
 
 $(window).load(function() {
@@ -56,17 +64,20 @@ $(window).load(function() {
     if (!socket) { console.log('Websocket not supported.'); return; }
     var port = document.location.port;
     var address = document.location.hostname + (port.length == 0 ? '' : ':' + port);
-    var websocket = new socket('ws://' + address + '/websocket');
+    websocket = new socket('ws://' + address + '/websocket');
     websocket.onopen = function() {
         console.log('Websocket opened.');
-        websocket.send(JSON.stringify({op: 'register'}));
-        websocket.send(JSON.stringify({op: 'history'}));
+        var appId = 'TEST_APP_ID';
+        subscribe(appId);
+        history(appId);
     }
     websocket.onclose = function() {
         console.log('Websocket closed.');
     }
     websocket.onmessage = function(event) {
         var data = JSON.parse(event.data);
-        addValue(data.tag, data.value);
+        console.log(data);
+        if (data.op == undefined)
+            addValue(data.tag, data.value);
     }
 });
