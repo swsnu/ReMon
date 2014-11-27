@@ -4,12 +4,12 @@ import motor
 import os.path
 import random
 import time
-import tornado.escape
 import tornado.gen
-import tornado.ioloop
 import tornado.httpserver
+import tornado.ioloop
 import tornado.web
 import tornado.websocket
+from tornado.escape import json_decode, json_encode
 from tornado.options import define, options
 
 define('port', default=8000, help='run on the given port', type=int)
@@ -41,19 +41,28 @@ class MainHandler(tornado.web.RequestHandler):
 class MessageQueue(object):
 
     def __init__(self):
-        self.subscribers = set()
+        self.channels = {}
 
-    def register(self, client):
-        self.subscribers.add(client)
+    def subscribe(self, app_id, client):
+        if app_id not in self.channels:
+            self.channels[app_id] = set()
+        self.channels[app_id].add(client)
 
-    def unregister(self, client):
-        if client in self.subscribers:
-            self.subscribers.remove(client)
+    def unsubscribe(self, app_id, client):
+        if app_id in self.channels:
+            if client in self.channels[app_id]:
+                self.channels[app_id].remove(client)
 
-    def publish(self, message):
-        logging.info('Publishing "%s"' % message)
-        for client in self.subscribers:
-            client.write_message(message)
+    def unsubscribe_all(self, client):
+        for app_id in self.channels:
+            self.unsubscribe(app_id, client)
+
+    def publish(self, app_id, message):
+        if app_id in self.channels:
+            n_clients = len(self.channels[app_id])
+            logging.info('[%s] (%d): "%s"' % (app_id, n_clients, message))
+            for client in self.channels[app_id]:
+                client.write_message(message)
 
 
 class WebsocketHandler(tornado.websocket.WebSocketHandler):
@@ -71,36 +80,46 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
 
     def on_close(self):
         logging.info('Websocket closed')
-        self.mq.unregister(self)
+        self.mq.unsubscribe_all(self)
 
     @tornado.gen.coroutine
     def on_message(self, message):
-        data = tornado.escape.json_decode(message)
+        data = json_decode(message)
+        op = data.get('op', 'insert')
+        app_id = data.get('app_id')
 
-        if data.get('op') is None:
-            app_id = data['app_id']
+        if op == 'insert':
             metrics = data['metrics']
-            for item in metrics:
-                self.mq.publish(tornado.escape.json_encode(item))
             yield self.db[app_id].insert(metrics)
+            for item in metrics:
+                item.pop('_id', None)
+                self.mq.publish(app_id, json_encode(item))
 
-        elif data.get('op') == u'register':
-            self.mq.register(self)
+        elif op == 'subscribe':
+            self.mq.subscribe(app_id, self)
+            self.write_message(json_encode({'op': op}))
 
-        elif data.get('op') == u'history':
-            app_id = data['app_id']
+        elif op == 'unsubscribe':
+            self.mq.unsubscribe(app_id, self)
+            self.write_message(json_encode({'op': op}))
+
+        elif op == 'history':
             cursor = self.db[app_id].find()
             while (yield cursor.fetch_next):
                 item = cursor.next_object()
                 item.pop('_id', None)
-                self.mq.publish(tornado.escape.json_encode(item))
+                self.write_message(json_encode(item))
 
-        elif data.get('op') == u'clear':
-            app_id = data['app_id']
+        elif op == 'clear':
             yield self.db[app_id].remove()
+            self.write_message(json_encode({'op': op}))
+
+        elif op == 'list':
+            app_list = yield self.db.collection_names()
+            self.write_message(json_encode({'op': op, 'app_list': app_list}))
 
         else:
-            self.mq.publish(tornado.escape.json_encode({'error': True}))
+            raise NotImplementedError('Undefined opcode: %s' % op)
 
 
 if __name__ == '__main__':
