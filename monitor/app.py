@@ -90,10 +90,10 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
 
         if op == 'insert':
             metrics = data['metrics']
-            yield self.db[app_id].insert(metrics)
+            assert(isinstance(metrics, list))
             for item in metrics:
-                item.pop('_id', None)
                 self.mq.publish(app_id, json_encode(item))
+            yield self.db[app_id].insert(metrics)
 
         elif op == 'subscribe':
             self.mq.subscribe(app_id, self)
