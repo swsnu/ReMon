@@ -21,6 +21,7 @@ class Application(tornado.web.Application):
     def __init__(self):
         settings = {
             'static_path': os.path.join(os.path.dirname(__file__), 'static'),
+            'table_prefix': 'app',
         }
         handlers = [
             (r'/', MainHandler),
@@ -84,6 +85,7 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
 
     @tornado.gen.coroutine
     def on_message(self, message):
+        prefix = self.application.settings['table_prefix']
         data = json_decode(message)
         op = data.get('op', 'insert')
         app_id = data.get('app_id')
@@ -93,7 +95,7 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             assert(isinstance(metrics, list))
             for item in metrics:
                 self.mq.publish(app_id, json_encode(item))
-            yield self.db[app_id].insert(metrics)
+            yield self.db[prefix + app_id].insert(metrics)
 
         elif op == 'subscribe':
             self.mq.subscribe(app_id, self)
@@ -104,18 +106,20 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             self.write_message(json_encode({'op': op}))
 
         elif op == 'history':
-            cursor = self.db[app_id].find()
+            cursor = self.db[prefix + app_id].find()
             while (yield cursor.fetch_next):
                 item = cursor.next_object()
                 item.pop('_id', None)
                 self.write_message(json_encode(item))
 
         elif op == 'clear':
-            yield self.db[app_id].remove()
+            yield self.db[prefix + app_id].remove()
             self.write_message(json_encode({'op': op}))
 
         elif op == 'list':
-            app_list = yield self.db.collection_names()
+            table_names = yield self.db.collection_names()
+            app_names = filter(lambda n: n.startswith(prefix), table_names)
+            app_list = map(lambda n: n[len(prefix):], app_names)
             self.write_message(json_encode({'op': op, 'app_list': app_list}))
 
         else:
