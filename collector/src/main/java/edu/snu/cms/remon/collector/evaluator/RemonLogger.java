@@ -1,5 +1,7 @@
 package edu.snu.cms.remon.collector.evaluator;
 
+import edu.snu.cms.remon.collector.Codec;
+import edu.snu.cms.remon.collector.Metric;
 import org.apache.reef.task.TaskMessage;
 import org.apache.reef.task.TaskMessageSource;
 import org.apache.reef.util.Optional;
@@ -10,22 +12,30 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class RemonLogger implements TaskMessageSource {
+  private static RemonLogger logger;
   public static final String SOURCE_ID = "remon";
   private static final Logger LOG = Logger.getLogger(RemonLogger.class.getName());
-  // TODO Define a data structure to be rendered in Monitor
-  private List<Object> logs;
+  // TODO Which would be a good value for Metric.Source?
+  private List<Metric> logs;
 
   @Inject
   public RemonLogger() {
   }
 
   public static RemonLogger getLogger() {
-    return new RemonLogger();
+    if (logger == null) {
+      logger = new RemonLogger();
+    }
+    return logger;
   }
 
   public void log(String str) {
     LOG.log(Level.SEVERE, str);
-    logs.add(str);
+    final String sourceID = "";
+    final String tag = "log";
+    final long time = System.currentTimeMillis();
+    final Metric newMetric = Metric.newBuilder().setSourceId(sourceID).setTag(tag).setTime(time).build();
+    logs.add(newMetric);
   }
 
   /**
@@ -36,7 +46,7 @@ public class RemonLogger implements TaskMessageSource {
   @Override
   public Optional<TaskMessage> getMessage() {
     // TODO Define a codec and encode the logs with it
-    final TaskMessage msg =  TaskMessage.from("remon", "encoded logs".getBytes());
+    final TaskMessage msg =  TaskMessage.from("remon", Codec.getCodec().encode(logs));
     logs.clear();
     return Optional.of(msg);
   }

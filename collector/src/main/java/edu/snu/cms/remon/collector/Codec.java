@@ -10,6 +10,14 @@ import java.util.List;
  * Codec which converts between Metrics and JSON string
  */
 public class Codec implements org.apache.reef.io.serialization.Codec<List<Metric>> {
+  private static Codec codec;
+
+  public static Codec getCodec() {
+    if (codec == null) {
+      codec = new Codec();
+    }
+    return codec;
+  }
 
   @Override
   public byte[] encode(List<Metric> obj) {

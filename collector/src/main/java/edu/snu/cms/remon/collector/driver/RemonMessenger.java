@@ -3,28 +3,18 @@ package edu.snu.cms.remon.collector.driver;
 import edu.snu.cms.remon.collector.*;
 import edu.snu.cms.remon.collector.evaluator.RemonLogger;
 import org.apache.reef.driver.task.TaskMessage;
-import org.apache.reef.tang.annotations.Parameter;
 import org.apache.reef.wake.EventHandler;
 import org.apache.reef.webserver.ReefEventStateManager;
-import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
-import org.eclipse.jetty.websocket.client.WebSocketClient;
 
 import javax.inject.Inject;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.URI;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class RemonMessenger implements EventHandler<TaskMessage> {
   private static final Logger LOG = Logger.getLogger(RemonMessenger.class.getName());
 
   private final ReefEventStateManager reefStateManager;
+  private final RemonWebSocket socket;
 
   /**
    * When Driver gets the TaskMessages, RemonMessenger sends the message
@@ -34,6 +24,9 @@ public class RemonMessenger implements EventHandler<TaskMessage> {
   @Inject
   public RemonMessenger(final ReefEventStateManager reefStateManager) {
     this.reefStateManager = reefStateManager;
+    try (RemonWebSocket socket = new RemonWebSocket()) {
+      this.socket = socket;
+    }
   }
 
   /**
@@ -49,6 +42,8 @@ public class RemonMessenger implements EventHandler<TaskMessage> {
       return;
     }
     // TODO Send the message to the Monitor server
+    // TODO Do we need to encode?
+    socket.sendMessage(ByteBuffer.wrap(value.get()));
   }
 }
 
