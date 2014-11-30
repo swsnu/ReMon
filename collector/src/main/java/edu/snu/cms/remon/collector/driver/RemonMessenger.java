@@ -22,7 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class RemonMessenger implements EventHandler<TaskMessage> {
-//  private static final Logger LOG = Logger.getLogger(RemonMessenger.class.getName());
+  private static final Logger LOG = Logger.getLogger(RemonMessenger.class.getName());
 
   private final ReefEventStateManager reefStateManager;
 
