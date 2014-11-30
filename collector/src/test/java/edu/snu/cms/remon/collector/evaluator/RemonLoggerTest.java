@@ -9,5 +9,6 @@ public class RemonLoggerTest {
   @Test
   public void testGetMessage() throws Exception {
     // TODO Test RemonLogger's each method
+    fail();
   }
 }
