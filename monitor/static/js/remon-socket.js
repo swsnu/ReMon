@@ -1,10 +1,9 @@
-var socket = window['WebSocket'] || window['MozWebSocket'];
 
 
 function RemonSocket(params) {
     params = params || {};
     this.url = params.url || this.getLocalUrl();
-    this.ws = new socket(this.url);
+    this.ws = new WebSocket(this.url);
     this.ws.onopen = this.onOpen.bind(this);
     this.ws.onclose = this.onClose.bind(this);
     this.ws.onmessage = this.onMessage.bind(this);
@@ -24,6 +23,7 @@ RemonSocket.prototype.getLocalUrl = function() {
 RemonSocket.prototype.send = function(data) {
     var text = JSON.stringify(data);
     this.ws.send(text);
+    console.log('Sent:', text);
 }
 
 

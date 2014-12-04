@@ -1,11 +1,12 @@
-var socket = window['WebSocket'] || window['MozWebSocket'];
 var dashboard;
 
 
 $(document).ready(function() {
-    if (!socket) {
+
+    if (!window['WebSocket']) {
         console.log('Websocket not supported.');
         return;
     }
+
     dashboard = new RemonDashboard();
 });
