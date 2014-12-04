@@ -14,6 +14,24 @@ function RemonGraph(params) {
 
 
 RemonGraph.prototype.draw = function() {
+    console.log('RemonGraph is an abstract class.');
+}
+
+RemonGraph.prototype.addValue = function() {
+    console.log('RemonGraph is an abstract class.');
+}
+
+
+RemonTimeseriesGraph.prototype = Object.create(RemonGraph.prototype);
+RemonTimeseriesGraph.prototype.constructor = RemonTimeseriesGraph;
+
+function RemonTimeseriesGraph(params) {
+    params = params || {};
+    RemonGraph.call(this, params);
+}
+
+
+RemonTimeseriesGraph.prototype.draw = function() {
     var element = document.getElementById(this.chartId);
 
     if (element !== null && this.graph === null) {
@@ -22,32 +40,41 @@ RemonGraph.prototype.draw = function() {
             width: element.offsetWidth,
             height: element.offsetWidth * this.aspectRatio,
             renderer: 'line',
-            series: [{ color: 'steelblue', data: this.data }],
+            series: [{ color: 'steelblue', name: this.name, data: this.data }],
         });
         this.graph.render();
+
+        var hoverDetail = new Rickshaw.Graph.HoverDetail({
+            graph: this.graph,
+            xFormatter: function(x) {
+                return (new Date(x * 1000)).toString();
+            },
+        });
+
+        var xAxis = new Rickshaw.Graph.Axis.Time({
+            graph: this.graph,
+            timeFixture: new Rickshaw.Fixtures.Time.Local(),
+        });
+        xAxis.render();
     }
 }
 
 
-RemonGraph.prototype.addValue = function(value) {
-    var idx = this.data.length;
-
-    this.data.push({ x: idx, y: value });
-
-    if (this.data.length > this.maxSize) {
-        this.shiftData(this.data.length - this.maxSize);
-    }
-
+RemonTimeseriesGraph.prototype.addValue = function(time, value) {
+    this.data.push({ x: time, y: value });
+    this.data.sort(function(a, b) {
+        return a.x - b.x;
+    });
     this.graph.series[0].data = this.data;
     this.graph.update();
     document.getElementById(this.valueId).innerHTML = value;
 }
 
 
-RemonGraph.prototype.shiftData = function(offset) {
-    for (var i in this.data) {
-        this.data[i].x -= offset;
-    }
+RemonLifecycleGraph.prototype = Object.create(RemonGraph.prototype);
+RemonLifecycleGraph.prototype.constructor = RemonLifecycleGraph;
 
-    this.data = this.data.slice(offset);
+function RemonLifecycleGraph(params) {
+    params = params || {};
+    RemonGraph.call(this, params);
 }

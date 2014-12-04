@@ -12,7 +12,7 @@ function RemonDashboard(params) {
 RemonDashboard.prototype.addGraph = function(tagName) {
     if (tagName in this.graphs === false) {
         var id = Object.keys(this.graphs).length;
-        var graph = new RemonGraph({ id: id, name: tagName });
+        var graph = new RemonTimeseriesGraph({ id: id, name: tagName });
 
         var source = $('#template-graph').html();
         var template = Handlebars.compile(source);
@@ -24,10 +24,10 @@ RemonDashboard.prototype.addGraph = function(tagName) {
 }
 
 
-RemonDashboard.prototype.addMetric = function(tagName, value) {
+RemonDashboard.prototype.addMetric = function(tagName, time, value) {
     this.addGraph(tagName);
     var graph = this.graphs[tagName];
-    graph.addValue(value);
+    graph.addValue(time, value);
 }
 
 
@@ -93,12 +93,12 @@ RemonDashboard.prototype.callback = function(data) {
         this.showAppList();
     }
     else if (data.op === 'metrics') {
-        this.addMetric(data.tag, data.value);
+        this.addMetric(data.tag, data.time, data.value);
     }
     else if (data.op == 'messages') {
         this.addMessage(data.level, data.message);
     }
     else {
-        console.log('Undefined opcode:', op);
+        console.log('Undefined opcode:', data.op);
     }
 }
