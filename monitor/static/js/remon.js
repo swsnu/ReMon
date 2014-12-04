@@ -59,7 +59,7 @@ RemonGraph.prototype.getValueId = function() {
 
 RemonGraph.prototype.makeHTML = function() {
     return $('\
-    <div class="col-sm-6 col-md-4">\
+    <div class="col-sm-12 col-md-6">\
         <div class="panel panel-default">\
             <div class="panel-heading">' + this.name + '</div>\
             <div class="panel-body">\
@@ -118,7 +118,7 @@ RemonDashboard.prototype.addGraph = function(tagName) {
         var id = Object.keys(this.graphs).length;
         var graph = new RemonGraph({ id: id, name: tagName });
         var html = graph.makeHTML();
-        $('#dashboard').append(html);
+        $('#metric-box').append(html);
         graph.draw();
         this.graphs[tagName] = graph;
     }
@@ -130,8 +130,12 @@ RemonDashboard.prototype.addValue = function(tagName, value) {
     graph.addValue(value);
 }
 
+RemonDashboard.prototype.addMessage = function(level, message) {
+    console.log(level, message);
+}
+
 RemonDashboard.prototype.showAppList = function() {
-    $('#dashboard').empty();
+    $('#metric-box').empty();
     var html = '';
     html += '<h2>App List</h2>';
     html += '<ul>';
@@ -141,11 +145,11 @@ RemonDashboard.prototype.showAppList = function() {
         html += appId + '</a></li>';
     }
     html += '</ul>';
-    $('#dashboard').html(html);
+    $('#metric-box').html(html);
 }
 
 RemonDashboard.prototype.changeApp = function(appId) {
-    $('#dashboard').empty();
+    $('#metric-box').empty();
     this.rs.send({ op: 'unsubscribe', app_id: this.appId });
     this.appId = appId;
     this.graphs = {};
@@ -154,8 +158,11 @@ RemonDashboard.prototype.changeApp = function(appId) {
 }
 
 RemonDashboard.prototype.callback = function(data) {
-    if (data.op === undefined && data.tag !== undefined) {
+    if (data.op === 'metrics') {
         this.addValue(data.tag, data.value);
+    }
+    else if (data.op == 'messages') {
+        this.addMessage(data.level, data.message);
     }
     else if (data.op === 'list') {
         this.appList = data.app_list;

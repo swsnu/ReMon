@@ -95,6 +95,7 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             metrics = data['metrics']
             assert(isinstance(metrics, list))
             for item in metrics:
+                item['op'] = 'metrics'
                 self.mq.publish(app_id, json_encode(item))
             table_name = metric_table_prefix + app_id
             yield self.db[table_name].insert(metrics)
@@ -103,6 +104,7 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             messages = data['messages']
             assert(isinstance(messages, list))
             for item in messages:
+                item['op'] = 'messages'
                 self.mq.publish(app_id, json_encode(item))
             table_name = message_table_prefix + app_id
             yield self.db[table_name].insert(messages)
