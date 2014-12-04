@@ -30,6 +30,20 @@ RemonGraph.prototype.draw = function() {
 
 
 RemonGraph.prototype.addValue = function(value) {
+    console.log('RemonGraph is an abstract class.');
+}
+
+
+RemonTimeseriesGraph.prototype = new RemonGraph();
+RemonTimeseriesGraph.prototype.constructor = RemonTimeseriesGraph;
+
+function RemonTimeseriesGraph(params) {
+    params = params || {};
+    RemonGraph(params);
+}
+
+
+RemonTimeseriesGraph.prototype.addValue = function(value) {
     var idx = this.data.length;
 
     this.data.push({ x: idx, y: value });
@@ -44,10 +58,19 @@ RemonGraph.prototype.addValue = function(value) {
 }
 
 
-RemonGraph.prototype.shiftData = function(offset) {
+RemonTimeseriesGraph.prototype.shiftData = function(offset) {
     for (var i in this.data) {
         this.data[i].x -= offset;
     }
 
     this.data = this.data.slice(offset);
+}
+
+
+RemonLifecycleGraph.prototype = new RemonGraph();
+RemonLifecycleGraph.prototype.constructor = RemonLifecycleGraph;
+
+function RemonLifecycleGraph(params) {
+    params = params || {};
+    RemonGraph(params);
 }

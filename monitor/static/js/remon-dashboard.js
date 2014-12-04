@@ -12,7 +12,7 @@ function RemonDashboard(params) {
 RemonDashboard.prototype.addGraph = function(tagName) {
     if (tagName in this.graphs === false) {
         var id = Object.keys(this.graphs).length;
-        var graph = new RemonGraph({ id: id, name: tagName });
+        var graph = new RemonTimeseriesGraph({ id: id, name: tagName });
 
         var source = $('#template-graph').html();
         var template = Handlebars.compile(source);
