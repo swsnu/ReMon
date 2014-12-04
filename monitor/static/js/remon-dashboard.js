@@ -70,13 +70,15 @@ RemonDashboard.prototype.showAppList = function() {
     var source = $('#template-app-list').html();
     var template = Handlebars.compile(source);
     var context = { apps: this.appList };
-    $('#metric-box').html(template(context));
+    $('#metric-box').html(template(context))
+    $('.navbar-brand').text('App List');
 }
 
 
 RemonDashboard.prototype.changeApp = function(appId) {
     $('#metric-box').empty();
     $('#message-box').empty();
+    $('.navbar-brand').html('App &raquo; ' + appId);
     this.rs.send({ op: 'unsubscribe', app_id: this.appId });
     this.appId = appId;
     this.graphs = {};
