@@ -43,27 +43,11 @@ function RemonTimeseriesGraph(params) {
 }
 
 
-RemonTimeseriesGraph.prototype.addValue = function(value) {
-    var idx = this.data.length;
-
-    this.data.push({ x: idx, y: value });
-
-    if (this.data.length > this.maxSize) {
-        this.shiftData(this.data.length - this.maxSize);
-    }
-
+RemonTimeseriesGraph.prototype.addValue = function(time, value) {
+    this.data.push({ x: time, y: value });
     this.graph.series[0].data = this.data;
     this.graph.update();
     document.getElementById(this.valueId).innerHTML = value;
-}
-
-
-RemonTimeseriesGraph.prototype.shiftData = function(offset) {
-    for (var i in this.data) {
-        this.data[i].x -= offset;
-    }
-
-    this.data = this.data.slice(offset);
 }
 
 
