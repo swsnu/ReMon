@@ -24,7 +24,7 @@ RemonDashboard.prototype.addGraph = function(tagName) {
 }
 
 
-RemonDashboard.prototype.addValue = function(tagName, value) {
+RemonDashboard.prototype.addMetric = function(tagName, value) {
     this.addGraph(tagName);
     var graph = this.graphs[tagName];
     graph.addValue(value);
@@ -55,14 +55,17 @@ RemonDashboard.prototype.changeApp = function(appId) {
 
 
 RemonDashboard.prototype.callback = function(data) {
-    if (data.op === 'metrics') {
-        this.addValue(data.tag, data.value);
+    if (data.op === 'list') {
+        this.appList = data.app_list;
+        this.showAppList();
+    }
+    else if (data.op === 'metrics') {
+        this.addMetric(data.tag, data.value);
     }
     else if (data.op == 'messages') {
         this.addMessage(data.level, data.message);
     }
-    else if (data.op === 'list') {
-        this.appList = data.app_list;
-        this.showAppList();
+    else {
+        console.log('Undefined opcode:', op);
     }
 }

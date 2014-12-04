@@ -91,7 +91,22 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
         op = data.get('op')
         app_id = data.get('app_id')
 
-        if op == 'metrics':
+        if op == 'list':
+            prefix = metric_table_prefix
+            table_names = yield self.db.collection_names()
+            app_names = filter(lambda n: n.startswith(prefix), table_names)
+            app_list = map(lambda n: {'app_id': n[len(prefix):]}, app_names)
+            self.write_message(json_encode({'op': op, 'app_list': app_list}))
+
+        elif op == 'subscribe':
+            self.mq.subscribe(app_id, self)
+            self.write_message(json_encode({'op': op}))
+
+        elif op == 'unsubscribe':
+            self.mq.unsubscribe(app_id, self)
+            self.write_message(json_encode({'op': op}))
+
+        elif op == 'metrics':
             metrics = data['metrics']
             assert(isinstance(metrics, list))
             for item in metrics:
@@ -109,14 +124,6 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             table_name = message_table_prefix + app_id
             yield self.db[table_name].insert(messages)
 
-        elif op == 'subscribe':
-            self.mq.subscribe(app_id, self)
-            self.write_message(json_encode({'op': op}))
-
-        elif op == 'unsubscribe':
-            self.mq.unsubscribe(app_id, self)
-            self.write_message(json_encode({'op': op}))
-
         elif op == 'history':
             for prefix in [metric_table_prefix, message_table_prefix]:
                 cursor = self.db[prefix + app_id].find()
@@ -133,13 +140,6 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             for prefix in [metric_table_prefix, message_table_prefix]:
                 yield self.db[prefix + app_id].remove()
             self.write_message(json_encode({'op': op}))
-
-        elif op == 'list':
-            prefix = metric_table_prefix
-            table_names = yield self.db.collection_names()
-            app_names = filter(lambda n: n.startswith(prefix), table_names)
-            app_list = map(lambda n: {'app_id': n[len(prefix):]}, app_names)
-            self.write_message(json_encode({'op': op, 'app_list': app_list}))
 
         else:
             raise NotImplementedError('Undefined opcode: %s' % op)
