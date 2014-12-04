@@ -13,8 +13,16 @@ RemonDashboard.prototype.addGraph = function(tagName) {
     if (tagName in this.graphs === false) {
         var id = Object.keys(this.graphs).length;
         var graph = new RemonGraph({ id: id, name: tagName });
-        var html = graph.makeHTML();
-        $('#metric-box').append(html);
+
+        var source = $('#template-graph').html();
+        var template = Handlebars.compile(source);
+        var context = {
+            name: graph.name,
+            chartId: graph.getChartId(),
+            valueId: graph.getValueId(),
+        };
+
+        $('#metric-box').append(template(context));
         graph.draw();
         this.graphs[tagName] = graph;
     }

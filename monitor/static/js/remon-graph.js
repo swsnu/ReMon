@@ -20,22 +20,6 @@ RemonGraph.prototype.getValueId = function() {
 }
 
 
-RemonGraph.prototype.makeHTML = function() {
-    return $('\
-    <div class="col-sm-12 col-md-6">\
-        <div class="panel panel-default">\
-            <div class="panel-heading">' + this.name + '</div>\
-            <div class="panel-body">\
-                <div id="' + this.getChartId() + '" class="chart"></div>\
-            </div>\
-            <div class="panel-footer">\
-                <span id="' + this.getValueId() + '" class="value">NaN</span>\
-            </div>\
-        </div>\
-    </div>');
-}
-
-
 RemonGraph.prototype.draw = function() {
     var element = document.getElementById(this.getChartId());
     if (element !== null && this.graph === null) {
