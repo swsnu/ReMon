@@ -2,8 +2,6 @@
 import logging
 import motor
 import os.path
-import random
-import time
 import tornado.gen
 import tornado.httpserver
 import tornado.ioloop
