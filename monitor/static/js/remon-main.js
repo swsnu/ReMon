@@ -8,5 +8,9 @@ $(document).ready(function() {
         return;
     }
 
+    $('#footer').click(function() {
+        $(this).toggleClass('enlarged');
+    });
+
     dashboard = new RemonDashboard();
 });

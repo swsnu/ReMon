@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link type="text/css" rel="stylesheet" href="{{ static_url('css/bootstrap.min.css') }}">
     <link type="text/css" rel="stylesheet" href="{{ static_url('css/rickshaw.min.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ static_url('css/remon.css') }}">
     <script type="text/javascript" src="{{ static_url('js/jquery.min.js') }}"></script>
     <script type="text/javascript" src="{{ static_url('js/bootstrap.min.js') }}"></script>
     <script type="text/javascript" src="{{ static_url('js/d3.v3.js') }}"></script>
@@ -43,9 +44,14 @@
 
 <div class="container">
     <div class="row">
-        <div id="metric-box" class="col-lg-6">
+        <div id="metric-box" class="col-lg-12">
         </div>
-        <div id="message-box" class="col-lg-6">
+    </div>
+</div>
+
+<div id="footer" class="container">
+    <div class="row">
+        <div id="message-box" class="col-lg-12">
         </div>
     </div>
 </div>
@@ -60,7 +66,7 @@
 </script>
 
 <script id="template-graph" type="text/x-handlebars-template">
-<div class="col-sm-12 col-md-6">
+<div class="col-sm-6 col-md-4">
     <div class="panel panel-default">
         <div class="panel-heading">{{!name}}</div>
         <div class="panel-body">
