@@ -45,6 +45,9 @@ function RemonTimeseriesGraph(params) {
 
 RemonTimeseriesGraph.prototype.addValue = function(time, value) {
     this.data.push({ x: time, y: value });
+    this.data.sort(function(a, b) {
+        return a.x - b.x;
+    });
     this.graph.series[0].data = this.data;
     this.graph.update();
     document.getElementById(this.valueId).innerHTML = value;
