@@ -16,13 +16,8 @@ RemonDashboard.prototype.addGraph = function(tagName) {
 
         var source = $('#template-graph').html();
         var template = Handlebars.compile(source);
-        var context = {
-            name: graph.name,
-            chartId: graph.getChartId(),
-            valueId: graph.getValueId(),
-        };
 
-        $('#metric-box').append(template(context));
+        $('#metric-box').append(template(graph));
         graph.draw();
         this.graphs[tagName] = graph;
     }
