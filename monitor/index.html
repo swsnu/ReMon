@@ -10,12 +10,17 @@
     <script type="text/javascript" src="{{ static_url('js/bootstrap.min.js') }}"></script>
     <script type="text/javascript" src="{{ static_url('js/d3.v3.js') }}"></script>
     <script type="text/javascript" src="{{ static_url('js/rickshaw.min.js') }}"></script>
-    <script type="text/javascript" src="{{ static_url('js/remon.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/handlebars.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/remon-dashboard.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/remon-graph.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/remon-main.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/remon-socket.js') }}"></script>
     <!--[if lt IE 9]>
         <script type="text/javascript" src="{{ static_url('js/html5shiv.min.js') }}"></script>
         <script type="text/javascript" src="{{ static_url('js/respond.min.js') }}"></script>
     <![endif]-->
 </head>
+
 <body>
 <nav class="navbar navbar-default navbar-static-top" role="navigation">
     <div class="container">
@@ -35,9 +40,44 @@
         </div>
     </div>
 </nav>
+
 <div class="container">
-    <div id="dashboard" class="row">
+    <div class="row">
+        <div id="metric-box" class="col-lg-6">
+        </div>
+        <div id="message-box" class="col-lg-6">
+        </div>
     </div>
 </div>
+
+<script id="template-app-list" type="text/x-handlebars-template">
+<h2>App List</h2>
+<ul>
+    {{!#each apps}}
+    <li><a href="javascript:dashboard.changeApp('{{!app_id}}')">{{!app_id}}</a></li>
+    {{!/each}}
+</ul>
+</script>
+
+<script id="template-graph" type="text/x-handlebars-template">
+<div class="col-sm-12 col-md-6">
+    <div class="panel panel-default">
+        <div class="panel-heading">{{!name}}</div>
+        <div class="panel-body">
+            <div id="{{!chartId}}" class="chart">
+        </div>
+        <div class="panel-footer">
+            <span id="{{!valueId}}" class="value">NaN</span>
+        </div>
+    </div>
+</div>
+</script>
+
+<script id="template-message" type="text/x-handlebars-template">
+<div class="alert alert-{{!alertType}}" role="alert">
+    {{!message}}
+</div>
+</script>
+
 </body>
 </html>

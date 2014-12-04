@@ -21,6 +21,7 @@ TEST_METRIC = {
     'value': TEST_VALUE,
 }
 TEST_MESSAGE = {
+    'op': 'metrics',
     'metrics': [TEST_METRIC],
 }
 

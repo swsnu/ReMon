@@ -2,8 +2,6 @@
 import logging
 import motor
 import os.path
-import random
-import time
 import tornado.gen
 import tornado.httpserver
 import tornado.ioloop
@@ -21,7 +19,8 @@ class Application(tornado.web.Application):
     def __init__(self):
         settings = {
             'static_path': os.path.join(os.path.dirname(__file__), 'static'),
-            'table_prefix': 'app',
+            'metric_table_prefix': 'metric_',
+            'message_table_prefix': 'message_',
         }
         handlers = [
             (r'/', MainHandler),
@@ -85,17 +84,19 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
 
     @tornado.gen.coroutine
     def on_message(self, message):
-        prefix = self.application.settings['table_prefix']
+        metric_table_prefix = self.settings['metric_table_prefix']
+        message_table_prefix = self.settings['message_table_prefix']
+
         data = json_decode(message)
-        op = data.get('op', 'insert')
+        op = data.get('op')
         app_id = data.get('app_id')
 
-        if op == 'insert':
-            metrics = data['metrics']
-            assert(isinstance(metrics, list))
-            for item in metrics:
-                self.mq.publish(app_id, json_encode(item))
-            yield self.db[prefix + app_id].insert(metrics)
+        if op == 'list':
+            prefix = metric_table_prefix
+            table_names = yield self.db.collection_names()
+            app_names = filter(lambda n: n.startswith(prefix), table_names)
+            app_list = map(lambda n: {'app_id': n[len(prefix):]}, app_names)
+            self.write_message(json_encode({'op': op, 'app_list': app_list}))
 
         elif op == 'subscribe':
             self.mq.subscribe(app_id, self)
@@ -105,22 +106,40 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             self.mq.unsubscribe(app_id, self)
             self.write_message(json_encode({'op': op}))
 
+        elif op == 'metrics':
+            metrics = data['metrics']
+            assert(isinstance(metrics, list))
+            for item in metrics:
+                item['op'] = 'metrics'
+                self.mq.publish(app_id, json_encode(item))
+            table_name = metric_table_prefix + app_id
+            yield self.db[table_name].insert(metrics)
+
+        elif op == 'messages':
+            messages = data['messages']
+            assert(isinstance(messages, list))
+            for item in messages:
+                item['op'] = 'messages'
+                self.mq.publish(app_id, json_encode(item))
+            table_name = message_table_prefix + app_id
+            yield self.db[table_name].insert(messages)
+
         elif op == 'history':
-            cursor = self.db[prefix + app_id].find()
-            while (yield cursor.fetch_next):
-                item = cursor.next_object()
-                item.pop('_id', None)
-                self.write_message(json_encode(item))
+            for prefix in [metric_table_prefix, message_table_prefix]:
+                cursor = self.db[prefix + app_id].find()
+                while (yield cursor.fetch_next):
+                    item = cursor.next_object()
+                    if prefix == metric_table_prefix:
+                        item['op'] = 'metrics'
+                    else:
+                        item['op'] = 'messages'
+                    item.pop('_id', None)
+                    self.write_message(json_encode(item))
 
         elif op == 'clear':
-            yield self.db[prefix + app_id].remove()
+            for prefix in [metric_table_prefix, message_table_prefix]:
+                yield self.db[prefix + app_id].remove()
             self.write_message(json_encode({'op': op}))
-
-        elif op == 'list':
-            table_names = yield self.db.collection_names()
-            app_names = filter(lambda n: n.startswith(prefix), table_names)
-            app_list = map(lambda n: n[len(prefix):], app_names)
-            self.write_message(json_encode({'op': op, 'app_list': app_list}))
 
         else:
             raise NotImplementedError('Undefined opcode: %s' % op)
