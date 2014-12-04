@@ -19,6 +19,7 @@ import com.microsoft.reef.io.network.nggroup.api.driver.CommunicationGroupDriver
 import com.microsoft.reef.io.network.nggroup.api.driver.GroupCommDriver;
 import com.microsoft.reef.io.network.nggroup.impl.config.BroadcastOperatorSpec;
 import com.microsoft.reef.io.network.nggroup.impl.config.ReduceOperatorSpec;
+import edu.snu.cms.remon.collector.evaluator.RemonLogger;
 import org.apache.reef.driver.context.ActiveContext;
 import org.apache.reef.driver.evaluator.EvaluatorRequestor;
 import org.apache.reef.driver.task.FailedTask;
@@ -121,27 +122,27 @@ public final class KMeansDriver {
 
     this.commGroup
         .addBroadcast(CtrlMsgBroadcast.class,
-            BroadcastOperatorSpec.newBuilder()
-                .setSenderId(KMeansControllerTask.TASK_ID)
-                .setDataCodecClass(SerializableCodec.class)
-                .build())
+          BroadcastOperatorSpec.newBuilder()
+            .setSenderId(KMeansControllerTask.TASK_ID)
+            .setDataCodecClass(SerializableCodec.class)
+            .build())
         .addBroadcast(CentroidBroadcast.class,
-            BroadcastOperatorSpec.newBuilder()
-                .setSenderId(KMeansControllerTask.TASK_ID)
-                .setDataCodecClass(CentroidListCodec.class)
-                .build())
+          BroadcastOperatorSpec.newBuilder()
+            .setSenderId(KMeansControllerTask.TASK_ID)
+            .setDataCodecClass(CentroidListCodec.class)
+            .build())
         .addReduce(NewCentroidReduce.class,
-            ReduceOperatorSpec.newBuilder()
-                .setReceiverId(KMeansControllerTask.TASK_ID)
-                .setDataCodecClass(MapOfIntVSumCodec.class)
-                .setReduceFunctionClass(MapOfIntVSumReduceFunction.class)
-                .build())
+          ReduceOperatorSpec.newBuilder()
+            .setReceiverId(KMeansControllerTask.TASK_ID)
+            .setDataCodecClass(MapOfIntVSumCodec.class)
+            .setReduceFunctionClass(MapOfIntVSumReduceFunction.class)
+            .build())
         .addReduce(InitialCetroidReduce.class,
-            ReduceOperatorSpec.newBuilder()
-                .setReceiverId(KMeansControllerTask.TASK_ID)
-                .setDataCodecClass(VectorListCodec.class)
-                .setReduceFunctionClass(VectorListReduceFunction.class)
-                .build())
+          ReduceOperatorSpec.newBuilder()
+            .setReceiverId(KMeansControllerTask.TASK_ID)
+            .setDataCodecClass(VectorListCodec.class)
+            .setReduceFunctionClass(VectorListReduceFunction.class)
+            .build())
         .finalise();
 
   }
@@ -189,6 +190,7 @@ public final class KMeansDriver {
               TaskConfiguration.CONF
                   .set(TaskConfiguration.IDENTIFIER, KMeansControllerTask.TASK_ID)
                   .set(TaskConfiguration.TASK, KMeansControllerTask.class)
+                  .set(TaskConfiguration.ON_SEND_MESSAGE, RemonLogger.class)
                   .build(),
               kMeansParameters.getCtrlTaskConfiguration());
 
@@ -201,6 +203,7 @@ public final class KMeansDriver {
               TaskConfiguration.CONF
                   .set(TaskConfiguration.IDENTIFIER, "CmpTask-" + taskId.getAndIncrement())
                   .set(TaskConfiguration.TASK, KMeansComputeTask.class)
+                  .set(TaskConfiguration.ON_SEND_MESSAGE, RemonLogger.class)
                   .build(),
               kMeansParameters.getCompTaskConfiguration());
         }
@@ -230,10 +233,11 @@ public final class KMeansDriver {
 
       final Configuration partialTaskConf = Tang.Factory.getTang()
           .newConfigurationBuilder(
-              TaskConfiguration.CONF
-                  .set(TaskConfiguration.IDENTIFIER, failedTask.getId() + "-R")
-                  .set(TaskConfiguration.TASK, KMeansComputeTask.class)
-                  .build())
+            TaskConfiguration.CONF
+              .set(TaskConfiguration.IDENTIFIER, failedTask.getId() + "-R")
+              .set(TaskConfiguration.TASK, KMeansComputeTask.class)
+              .set(TaskConfiguration.ON_SEND_MESSAGE, RemonLogger.class)
+              .build())
           .build();
 
       // Re-add the failed Compute Task

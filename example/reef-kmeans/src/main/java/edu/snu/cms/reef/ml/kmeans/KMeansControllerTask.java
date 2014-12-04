@@ -18,6 +18,7 @@ package edu.snu.cms.reef.ml.kmeans;
 import com.microsoft.reef.io.network.group.operators.*;
 import com.microsoft.reef.io.network.nggroup.api.task.CommunicationGroupClient;
 import com.microsoft.reef.io.network.nggroup.api.task.GroupCommClient;
+import edu.snu.cms.remon.collector.evaluator.RemonLogger;
 import org.apache.mahout.math.Vector;
 import edu.snu.cms.reef.ml.kmeans.data.Centroid;
 import edu.snu.cms.reef.ml.kmeans.groupcomm.names.*;
@@ -42,6 +43,7 @@ import java.util.logging.Logger;
  */
 public final class KMeansControllerTask implements Task {
   private static final Logger LOG = Logger.getLogger(KMeansControllerTask.class.getName());
+
 
   /**
    * Task ID used for configuring Group Communication
@@ -94,6 +96,7 @@ public final class KMeansControllerTask implements Task {
    * Maximum number of iterations allowed before job stops
    */
   private final int maxIterations;
+  private final RemonLogger logger;
 
   /**
    * This class is instantiated by TANG
@@ -107,8 +110,8 @@ public final class KMeansControllerTask implements Task {
   @Inject
   public KMeansControllerTask(final GroupCommClient groupCommClient,
                               final KMeansConvergenceCondition convergenceCondition,
-                              @Parameter(MaxIterations.class) final int maxIter) {
-
+                              @Parameter(MaxIterations.class) final int maxIter,
+                              final RemonLogger logger) {
     super();
 
     this.communicationGroupClient = groupCommClient.getCommunicationGroup(CommunicationGroup.class);
@@ -119,6 +122,7 @@ public final class KMeansControllerTask implements Task {
 
     this.convergenceCondition = convergenceCondition;
     this.maxIterations = maxIter;
+    this.logger = logger;
   }
 
 
@@ -140,6 +144,7 @@ public final class KMeansControllerTask implements Task {
     }
 
     for (int iteration = 0; iteration < maxIterations; iteration++) {
+      logger.value("iteration", iteration);
       if (iterateKMeansClustering(iteration) == false) break;
     }
 

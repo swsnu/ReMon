@@ -19,6 +19,7 @@ import com.microsoft.reef.io.network.group.operators.Broadcast;
 import com.microsoft.reef.io.network.group.operators.Reduce;
 import com.microsoft.reef.io.network.nggroup.api.task.CommunicationGroupClient;
 import com.microsoft.reef.io.network.nggroup.api.task.GroupCommClient;
+import edu.snu.cms.remon.collector.evaluator.RemonLogger;
 import org.apache.mahout.math.Vector;
 import org.apache.reef.io.network.util.Pair;
 import edu.snu.cms.reef.ml.kmeans.data.Centroid;
@@ -88,6 +89,7 @@ public final class KMeansComputeTask implements Task {
    */
   private List<Vector> initialCentroids = new ArrayList<>();
 
+  private RemonLogger logger;
   /**
    * This class is instantiated by TANG
    *
@@ -100,9 +102,11 @@ public final class KMeansComputeTask implements Task {
   @Inject
   KMeansComputeTask(final DataParser<Pair<List<Vector>, List<Vector>>> dataParser,
                     final GroupCommClient groupCommClient,
-                    final VectorDistanceMeasure distanceMeasure) {
+                    final VectorDistanceMeasure distanceMeasure,
+                    final RemonLogger logger) {
     super();
     this.dataParser = dataParser;
+    this.logger = logger;
 
     CommunicationGroupClient commGroupClient = groupCommClient.getCommunicationGroup(CommunicationGroup.class);
     this.initialCentroidReduce = commGroupClient.getReduceSender(InitialCetroidReduce.class);
@@ -162,6 +166,7 @@ public final class KMeansComputeTask implements Task {
 
       for (int i = 0; i < clusters.size(); i++) {
         final double distance = distanceMeasure.distance(clusters.get(i).vector, vector);
+        logger.value("distance", distance);
         if (nearestClusterDist > distance) {
           nearestClusterDist = distance;
           nearestClusterId = i;

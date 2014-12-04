@@ -52,7 +52,7 @@ public class SimpleEchoSocket {
     try {
       Future<Void> fut;
       fut = session.getRemote().sendBytesByFuture(msg);
-      fut.get(2, TimeUnit.SECONDS);
+      fut.get(1, TimeUnit.SECONDS);
       session.close(StatusCode.NORMAL, "I'm done");
     } catch (Throwable t) {
       t.printStackTrace();
