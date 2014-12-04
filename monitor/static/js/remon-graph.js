@@ -34,12 +34,12 @@ RemonGraph.prototype.addValue = function(value) {
 }
 
 
-RemonTimeseriesGraph.prototype = new RemonGraph();
+RemonTimeseriesGraph.prototype = Object.create(RemonGraph.prototype);
 RemonTimeseriesGraph.prototype.constructor = RemonTimeseriesGraph;
 
 function RemonTimeseriesGraph(params) {
     params = params || {};
-    RemonGraph(params);
+    RemonGraph.call(this, params);
 }
 
 
@@ -54,10 +54,10 @@ RemonTimeseriesGraph.prototype.addValue = function(time, value) {
 }
 
 
-RemonLifecycleGraph.prototype = new RemonGraph();
+RemonLifecycleGraph.prototype = Object.create(RemonGraph.prototype);
 RemonLifecycleGraph.prototype.constructor = RemonLifecycleGraph;
 
 function RemonLifecycleGraph(params) {
     params = params || {};
-    RemonGraph(params);
+    RemonGraph.call(this, params);
 }
