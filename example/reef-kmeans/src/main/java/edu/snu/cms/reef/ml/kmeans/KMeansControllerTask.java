@@ -111,9 +111,7 @@ public final class KMeansControllerTask implements Task {
   public KMeansControllerTask(final GroupCommClient groupCommClient,
                               final KMeansConvergenceCondition convergenceCondition,
                               @Parameter(MaxIterations.class) final int maxIter,
-                              final RemonLogger logger
-  ) {
-
+                              final RemonLogger logger) {
     super();
 
     this.communicationGroupClient = groupCommClient.getCommunicationGroup(CommunicationGroup.class);
@@ -184,7 +182,6 @@ public final class KMeansControllerTask implements Task {
     LOG.log(Level.INFO, "********* Centroids after {0} iterations*********", iteration + 1);
 
     // 5. If threshold is violated, then repeat from 3
-
     return !convergenceCondition.checkConvergence(centroids);
   }
 

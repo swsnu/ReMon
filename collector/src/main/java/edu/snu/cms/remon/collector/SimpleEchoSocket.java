@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  * When Collector has received a message from one evaluator,
  * it connects to the Monitor and emit the data in JSON format.
  */
-@WebSocket(maxTextMessageSize = 256 * 1024)
+@WebSocket(maxTextMessageSize = 64 * 1024)
 public class SimpleEchoSocket {
   // TODO : Persist the connection and hold the socket object. Send the data via existing socket object.
   private static final Logger LOG = Logger.getLogger(SimpleEchoSocket.class.getName());
@@ -53,7 +53,6 @@ public class SimpleEchoSocket {
       Future<Void> fut;
       fut = session.getRemote().sendBytesByFuture(msg);
       fut.get(1, TimeUnit.SECONDS);
-//      session.getRemote().sendBytes(msg);
       session.close(StatusCode.NORMAL, "I'm done");
     } catch (Throwable t) {
       t.printStackTrace();

@@ -138,7 +138,7 @@ public final class KMeansREEF {
         .set(DriverConfiguration.DRIVER_IDENTIFIER, "K-means Clustering")
         .set(DriverConfiguration.ON_CONTEXT_ACTIVE, KMeansDriver.ActiveContextHandler.class)
         .set(DriverConfiguration.ON_TASK_FAILED, KMeansDriver.FailedTaskHandler.class)
-      .set(DriverConfiguration.ON_TASK_MESSAGE, RemonMessenger.class);
+        .set(DriverConfiguration.ON_TASK_MESSAGE, RemonMessenger.class);
 
     final EvaluatorRequest evalRequest = EvaluatorRequest.newBuilder()
         .setNumber(1)
