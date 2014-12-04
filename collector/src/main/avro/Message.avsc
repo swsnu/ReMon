@@ -2,13 +2,13 @@
 {
   "namespace" : "edu.snu.cms.remon.collector",
   "type" : "record",
-  "name" : "Metric",
+  "name" : "Message",
   "fields" :
   [
     { "name" : "source_id", "type" : "string" },
-    { "name" : "tag", "type" : "string" },
+    { "name" : "level", "type" : "string" },
     { "name" : "time", "type" : "long" },
-    { "name" : "value", "type" : "double" }
+    { "name" : "message", "type" : "string" }
   ]
 },
 {
@@ -16,7 +16,7 @@
   "type" : "record",
   "name" : "op",
   "type" : "record",
-  "name" : "Metrics",
+  "name" : "Messages",
   "fields" :
   [
     {
@@ -24,11 +24,11 @@
       "type" : "string"
     },
     {
-      "name" : "metrics",
+      "name" : "messages",
       "type" :
       {
         "type" : "array",
-        "items" : "Metric"
+        "items" : "Message"
       }
     }
   ]
