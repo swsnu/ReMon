@@ -20,6 +20,8 @@ import com.microsoft.reef.io.network.nggroup.api.driver.GroupCommDriver;
 import com.microsoft.reef.io.network.nggroup.impl.config.BroadcastOperatorSpec;
 import com.microsoft.reef.io.network.nggroup.impl.config.ReduceOperatorSpec;
 import edu.snu.cms.remon.collector.evaluator.RemonLogger;
+import edu.snu.cms.remon.collector.evaluator.RemonStartTaskHandler;
+import edu.snu.cms.remon.collector.evaluator.RemonStopTaskHandler;
 import org.apache.reef.driver.context.ActiveContext;
 import org.apache.reef.driver.evaluator.EvaluatorRequestor;
 import org.apache.reef.driver.task.FailedTask;
@@ -38,6 +40,7 @@ import org.apache.reef.tang.Injector;
 import org.apache.reef.tang.Tang;
 import org.apache.reef.tang.annotations.Unit;
 import org.apache.reef.tang.exceptions.InjectionException;
+import org.apache.reef.task.events.TaskStart;
 import org.apache.reef.wake.EventHandler;
 
 import javax.inject.Inject;
@@ -117,33 +120,33 @@ public final class KMeansDriver {
     this.kMeansParameters = kMeansParameters;
 
     this.commGroup = groupCommDriver.newCommunicationGroup(
-        CommunicationGroup.class,
-        dataLoadingService.getNumberOfPartitions() + 1);
+      CommunicationGroup.class,
+      dataLoadingService.getNumberOfPartitions() + 1);
 
     this.commGroup
-        .addBroadcast(CtrlMsgBroadcast.class,
-          BroadcastOperatorSpec.newBuilder()
-            .setSenderId(KMeansControllerTask.TASK_ID)
-            .setDataCodecClass(SerializableCodec.class)
-            .build())
-        .addBroadcast(CentroidBroadcast.class,
-          BroadcastOperatorSpec.newBuilder()
-            .setSenderId(KMeansControllerTask.TASK_ID)
-            .setDataCodecClass(CentroidListCodec.class)
-            .build())
-        .addReduce(NewCentroidReduce.class,
-          ReduceOperatorSpec.newBuilder()
-            .setReceiverId(KMeansControllerTask.TASK_ID)
-            .setDataCodecClass(MapOfIntVSumCodec.class)
-            .setReduceFunctionClass(MapOfIntVSumReduceFunction.class)
-            .build())
-        .addReduce(InitialCetroidReduce.class,
-          ReduceOperatorSpec.newBuilder()
-            .setReceiverId(KMeansControllerTask.TASK_ID)
-            .setDataCodecClass(VectorListCodec.class)
-            .setReduceFunctionClass(VectorListReduceFunction.class)
-            .build())
-        .finalise();
+      .addBroadcast(CtrlMsgBroadcast.class,
+        BroadcastOperatorSpec.newBuilder()
+          .setSenderId(KMeansControllerTask.TASK_ID)
+          .setDataCodecClass(SerializableCodec.class)
+          .build())
+      .addBroadcast(CentroidBroadcast.class,
+        BroadcastOperatorSpec.newBuilder()
+          .setSenderId(KMeansControllerTask.TASK_ID)
+          .setDataCodecClass(CentroidListCodec.class)
+          .build())
+      .addReduce(NewCentroidReduce.class,
+        ReduceOperatorSpec.newBuilder()
+          .setReceiverId(KMeansControllerTask.TASK_ID)
+          .setDataCodecClass(MapOfIntVSumCodec.class)
+          .setReduceFunctionClass(MapOfIntVSumReduceFunction.class)
+          .build())
+      .addReduce(InitialCetroidReduce.class,
+        ReduceOperatorSpec.newBuilder()
+          .setReceiverId(KMeansControllerTask.TASK_ID)
+          .setDataCodecClass(VectorListCodec.class)
+          .setReduceFunctionClass(VectorListReduceFunction.class)
+          .build())
+      .finalise();
 
   }
 
@@ -187,12 +190,12 @@ public final class KMeansDriver {
         if (activeContext.getId().equals(ctrlTaskContextId)) {
           LOG.log(Level.INFO, "Submit ControllerTask");
           partialTaskConf = Configurations.merge(
-              TaskConfiguration.CONF
-                  .set(TaskConfiguration.IDENTIFIER, KMeansControllerTask.TASK_ID)
-                  .set(TaskConfiguration.TASK, KMeansControllerTask.class)
-                  .set(TaskConfiguration.ON_SEND_MESSAGE, RemonLogger.class)
-                  .build(),
-              kMeansParameters.getCtrlTaskConfiguration());
+            TaskConfiguration.CONF
+              .set(TaskConfiguration.IDENTIFIER, KMeansControllerTask.TASK_ID)
+              .set(TaskConfiguration.TASK, KMeansControllerTask.class)
+              .set(TaskConfiguration.ON_SEND_MESSAGE, RemonLogger.class)
+              .build(),
+            kMeansParameters.getCtrlTaskConfiguration());
 
           // Case 3: Evaluator configured with a Group Communication context has been given,
           //         representing a Compute Task
@@ -200,12 +203,12 @@ public final class KMeansDriver {
         } else {
           LOG.log(Level.INFO, "Submit ComputeTask");
           partialTaskConf = Configurations.merge(
-              TaskConfiguration.CONF
-                  .set(TaskConfiguration.IDENTIFIER, "CmpTask-" + taskId.getAndIncrement())
-                  .set(TaskConfiguration.TASK, KMeansComputeTask.class)
-                  .set(TaskConfiguration.ON_SEND_MESSAGE, RemonLogger.class)
-                  .build(),
-              kMeansParameters.getCompTaskConfiguration());
+            TaskConfiguration.CONF
+              .set(TaskConfiguration.IDENTIFIER, "CmpTask-" + taskId.getAndIncrement())
+              .set(TaskConfiguration.TASK, KMeansComputeTask.class)
+              .set(TaskConfiguration.ON_SEND_MESSAGE, RemonLogger.class)
+              .build(),
+            kMeansParameters.getCompTaskConfiguration());
         }
 
         // add the Task to our communication group
@@ -232,13 +235,13 @@ public final class KMeansDriver {
       }
 
       final Configuration partialTaskConf = Tang.Factory.getTang()
-          .newConfigurationBuilder(
-            TaskConfiguration.CONF
-              .set(TaskConfiguration.IDENTIFIER, failedTask.getId() + "-R")
-              .set(TaskConfiguration.TASK, KMeansComputeTask.class)
-              .set(TaskConfiguration.ON_SEND_MESSAGE, RemonLogger.class)
-              .build())
-          .build();
+        .newConfigurationBuilder(
+          TaskConfiguration.CONF
+            .set(TaskConfiguration.IDENTIFIER, failedTask.getId() + "-R")
+            .set(TaskConfiguration.TASK, KMeansComputeTask.class)
+            .set(TaskConfiguration.ON_SEND_MESSAGE, RemonLogger.class)
+            .build())
+        .build();
 
       // Re-add the failed Compute Task
       commGroup.addTask(partialTaskConf);
