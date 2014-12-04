@@ -16,6 +16,7 @@
 package edu.snu.cms.reef.ml.kmeans;
 
 import com.microsoft.reef.io.network.nggroup.impl.driver.GroupCommService;
+import edu.snu.cms.remon.collector.driver.RemonMessenger;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.reef.client.DriverConfiguration;
 import org.apache.reef.client.DriverLauncher;
@@ -136,7 +137,8 @@ public final class KMeansREEF {
         .set(DriverConfiguration.GLOBAL_LIBRARIES, EnvironmentUtils.getClassLocation(TextInputFormat.class))
         .set(DriverConfiguration.DRIVER_IDENTIFIER, "K-means Clustering")
         .set(DriverConfiguration.ON_CONTEXT_ACTIVE, KMeansDriver.ActiveContextHandler.class)
-        .set(DriverConfiguration.ON_TASK_FAILED, KMeansDriver.FailedTaskHandler.class);
+        .set(DriverConfiguration.ON_TASK_FAILED, KMeansDriver.FailedTaskHandler.class)
+      .set(DriverConfiguration.ON_TASK_MESSAGE, RemonMessenger.class);
 
     final EvaluatorRequest evalRequest = EvaluatorRequest.newBuilder()
         .setNumber(1)

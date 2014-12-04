@@ -82,6 +82,11 @@
       <version>1.9.5</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>edu.snu.cms.remon.collector</groupId>
+      <artifactId>collector</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>

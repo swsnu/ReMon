@@ -15,6 +15,7 @@
  */
 package edu.snu.cms.reef.ml.kmeans.converge;
 
+import edu.snu.cms.remon.collector.evaluator.RemonLogger;
 import org.apache.mahout.math.Vector;
 import edu.snu.cms.reef.ml.kmeans.data.Centroid;
 import edu.snu.cms.reef.ml.kmeans.parameters.ConvergenceThreshold;
@@ -24,6 +25,8 @@ import org.apache.reef.tang.annotations.Parameter;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Default implementation of KMeansConvergenceCondition
@@ -31,18 +34,22 @@ import java.util.Map;
  * a certain threshold after an iteration
  */
 public final class KMeansConvergenceEuclidean implements KMeansConvergenceCondition {
+  private static final Logger LOG = Logger.getLogger(KMeansConvergenceCondition.class.getName());
 
   Map<Integer, Centroid> oldCentroids;
   final double convergenceThreshold;
   final EuclideanDistance euclideanDistance;
+  final RemonLogger rLogger;
 
   @Inject
   public KMeansConvergenceEuclidean(
       final EuclideanDistance euclideanDistance,
-      @Parameter(ConvergenceThreshold.class) final double convergenceThreshold
+      @Parameter(ConvergenceThreshold.class) final double convergenceThreshold,
+      final RemonLogger rLogger
       ) {
     this.euclideanDistance = euclideanDistance;
     this.convergenceThreshold = convergenceThreshold;
+    this.rLogger = rLogger;
   }
 
   @Override
@@ -60,9 +67,12 @@ public final class KMeansConvergenceEuclidean implements KMeansConvergenceCondit
     boolean hasConverged = true;
     for (final Centroid centroid : centroids) {
       Centroid oldCentroid = oldCentroids.get(centroid.getClusterId());
+      final double dist = distance(centroid.vector, oldCentroid.vector);
+      rLogger.value("distance", dist);
+      LOG.log(Level.SEVERE, "Dist : " + dist);
 
       if (hasConverged
-          && distance(centroid.vector, oldCentroid.vector) > convergenceThreshold) {
+          && dist > convergenceThreshold) {
         hasConverged = false;
       }
 
