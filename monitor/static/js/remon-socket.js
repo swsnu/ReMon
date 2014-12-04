@@ -30,11 +30,13 @@ RemonSocket.prototype.send = function(data) {
 RemonSocket.prototype.onOpen = function() {
     console.log('Websocket opened.');
     this.send({ op: 'list' });
+    $('#connection').text('Connected');
 }
 
 
 RemonSocket.prototype.onClose = function() {
     console.log('Websocket closed.');
+    $('#connection').text('Disconnected');
 }
 
 
