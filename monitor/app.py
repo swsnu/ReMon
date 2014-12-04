@@ -122,6 +122,10 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
                 cursor = self.db[prefix + app_id].find()
                 while (yield cursor.fetch_next):
                     item = cursor.next_object()
+                    if prefix == metric_table_prefix:
+                        item['op'] = 'metrics'
+                    else:
+                        item['op'] = 'messages'
                     item.pop('_id', None)
                     self.write_message(json_encode(item))
 
@@ -134,7 +138,7 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             prefix = metric_table_prefix
             table_names = yield self.db.collection_names()
             app_names = filter(lambda n: n.startswith(prefix), table_names)
-            app_list = map(lambda n: n[len(prefix):], app_names)
+            app_list = map(lambda n: {'app_id': n[len(prefix):]}, app_names)
             self.write_message(json_encode({'op': op, 'app_list': app_list}))
 
         else:

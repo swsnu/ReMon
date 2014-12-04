@@ -34,17 +34,10 @@ RemonDashboard.prototype.addMessage = function(level, message) {
 
 
 RemonDashboard.prototype.showAppList = function() {
-    $('#metric-box').empty();
-    var html = '';
-    html += '<h2>App List</h2>';
-    html += '<ul>';
-    for (var i in this.appList) {
-        var appId = this.appList[i];
-        html += '<li><a href="javascript:dashboard.changeApp(\'' + appId + '\')">';
-        html += appId + '</a></li>';
-    }
-    html += '</ul>';
-    $('#metric-box').html(html);
+    var source = $('#template-app-list').html();
+    var template = Handlebars.compile(source);
+    var context = {apps: this.appList};
+    $('#metric-box').html(template(context));
 }
 
 

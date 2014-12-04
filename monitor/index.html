@@ -10,6 +10,7 @@
     <script type="text/javascript" src="{{ static_url('js/bootstrap.min.js') }}"></script>
     <script type="text/javascript" src="{{ static_url('js/d3.v3.js') }}"></script>
     <script type="text/javascript" src="{{ static_url('js/rickshaw.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/handlebars.js') }}"></script>
     <script type="text/javascript" src="{{ static_url('js/remon-socket.js') }}"></script>
     <script type="text/javascript" src="{{ static_url('js/remon-graph.js') }}"></script>
     <script type="text/javascript" src="{{ static_url('js/remon-dashboard.js') }}"></script>
@@ -46,5 +47,13 @@
         </div>
     </div>
 </div>
+<script id="template-app-list" type="text/x-handlebars-template">
+<h2>App List</h2>
+<ul>
+    {{!#each apps}}
+    <li><a href="javascript:dashboard.changeApp('{{!app_id}}')">{{!app_id}}</a></li>
+    {{!/each}}
+</ul>
+</script>
 </body>
 </html>
