@@ -8,16 +8,24 @@ from websocket import create_connection
 if __name__ == '__main__':
     address = 'ws://localhost:8000/websocket'
     ws = create_connection(address)
-    ws.send(json_encode({'op': 'clear', 'app_id': 'TEST_APP_ID'}))
+    ws.send(json_encode({'op': 'clear'}))
+    time.sleep(1.)
     n_times = 10
-    for _ in xrange(n_times):
+    for t in xrange(n_times):
         message = {
+            'op': 'insert',
             'app_id': 'TEST_APP_ID',
             'metrics': [{
                 'tag': 'TEST_TAG',
-                'value': random.random(),
+                'value': random.random() + t,
                 'source_id': 'TEST_SOURCE_ID',
-                'time': int(time.time()),
+                'time': int(time.time()) + t,
+            }],
+            'messages': [{
+                'level': 'INFO',
+                'message': 'TEST_INFO_MESSAGE',
+                'source_id': 'TEST_SOURCE_ID',
+                'time': int(time.time()) + t,
             }],
         }
         ws.send(json_encode(message))
