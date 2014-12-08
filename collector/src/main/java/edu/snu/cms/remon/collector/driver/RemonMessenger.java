@@ -4,6 +4,7 @@ import edu.snu.cms.remon.collector.*;
 import org.apache.reef.driver.task.TaskMessage;
 import org.apache.reef.tang.annotations.Parameter;
 import org.apache.reef.wake.EventHandler;
+import org.apache.reef.wake.time.event.StartTime;
 import org.apache.reef.webserver.ReefEventStateManager;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
@@ -42,16 +43,6 @@ public class RemonMessenger implements EventHandler<TaskMessage> {
   @Override
   public void onNext(org.apache.reef.driver.task.TaskMessage value) {
     final List<Metric> metricList = new Codec().decode(value.get());
-
-    // Add the number of evaluators as a metric
-/*    metricList.add(new Metric(reefStateManager.getDriverEndpointIdentifier(), "NumEval", System.currentTimeMillis(), (double)reefStateManager.getEvaluators().size()));
-    final Set<String> evalIds = reefStateManager.getEvaluators().keySet();
-    for (String evalId : evalIds) {
-      // Add memory size of each evaluator as a metric
-      final long mem = reefStateManager.getEvaluators().get(evalId).getMemory();
-      metricList.add(new Metric(reefStateManager.getDriverEndpointIdentifier(), "EvalMem" + "@" + evalId, System.currentTimeMillis(), (double)mem));
-    }
-    */
 
     // TODO Specify App1 to be the applicationId of this app
     final Metrics metrics = new Metrics(appId, metricList);
