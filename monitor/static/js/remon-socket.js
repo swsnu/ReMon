@@ -30,13 +30,15 @@ RemonSocket.prototype.send = function(data) {
 RemonSocket.prototype.onOpen = function() {
     console.log('Websocket opened.');
     this.send({ op: 'list' });
-    $('#connection').text('Connected');
+    $('#connection').removeClass('glyphicon-remove');
+    $('#connection').addClass('glyphicon-ok');
 }
 
 
 RemonSocket.prototype.onClose = function() {
     console.log('Websocket closed.');
-    $('#connection').text('Disconnected');
+    $('#connection').removeClass('glyphicon-ok');
+    $('#connection').addClass('glyphicon-remove');
 }
 
 

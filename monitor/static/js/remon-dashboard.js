@@ -9,60 +9,22 @@ function RemonDashboard(params) {
 }
 
 
-RemonDashboard.prototype.addGraph = function(tagName) {
-    if (tagName in this.graphs === false) {
-        var id = Object.keys(this.graphs).length;
-        var graph = new RemonTimeseriesGraph({ id: id, name: tagName });
-
-        var source = $('#template-graph').html();
-        var template = Handlebars.compile(source);
-
-        $('#metric-box').append(template(graph));
-        graph.draw();
-        this.graphs[tagName] = graph;
-    }
-}
-
-
 RemonDashboard.prototype.addMetric = function(metric) {
-    this.addGraph(metric.tag);
+    if (metric.tag in this.graphs === false) {
+        var id = Object.keys(this.graphs).length;
+        var graph = new RemonTimeseriesGraph({ id: id, name: metric.tag });
+        this.graphs[metric.tag] = graph;
+        graph.draw();
+    }
+
     var graph = this.graphs[metric.tag];
     graph.addValue(metric.time, metric.value);
 }
 
 
 RemonDashboard.prototype.addMessage = function(message) {
-    var alertType = "";
-
-    switch (message.level) {
-        case "FINEST":
-        case "FINER":
-        case "FINE":
-            alertType = "success";
-            break;
-
-        case "CONFIG":
-        case "INFO":
-            alertType = "info";
-            break;
- 
-        case "WARNING":
-            alertType = "warning";
-            break;
-
-        case "SEVERE":
-            alertType = "error";
-            break;
-
-        default:
-            alertType = "success";
-            break;
-    }
-
-    var source = $('#template-message').html();
-    var template = Handlebars.compile(source);
-    var context = { alertType: alertType, message: message.message };
-    $('#message-box').append(template(context));
+    var message = new RemonMessage(message);
+    message.draw();
 }
 
 
@@ -71,14 +33,14 @@ RemonDashboard.prototype.showAppList = function() {
     var template = Handlebars.compile(source);
     var context = { apps: this.appList };
     $('#metric-box').html(template(context))
-    $('.navbar-brand').text('App List');
+    $('.navbar-brand').text('ReMon');
 }
 
 
 RemonDashboard.prototype.changeApp = function(appId) {
     $('#metric-box').empty();
-    $('#message-box').empty();
-    $('.navbar-brand').html('App &raquo; ' + appId);
+    $('#message-logs').empty();
+    $('.navbar-brand').html('ReMon &raquo; ' + appId);
     this.appId = appId;
     this.graphs = {};
     this.rs.send({ op: 'subscribe', app_id: appId });
