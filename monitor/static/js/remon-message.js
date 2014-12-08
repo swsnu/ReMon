@@ -1,47 +1,53 @@
+Object.defineProperty(Date.prototype, 'toPrettyString', {
+    value: function() {
+        function pad(n) {
+            return (n < 10 ? '0' : '') + n;
+        }
+
+        return this.getFullYear() + '-' +
+               pad(this.getMonth() + 1) + '-' +
+               pad(this.getDate()) + ' ' +
+               pad(this.getHours()) + ':' +
+               pad(this.getMinutes()) + ':' +
+               pad(this.getSeconds());
+    }
+});
 
 
 function RemonMessage(params) {
     params = params || {};
-    this.level = params.level || {};
+    this.level = params.level || "";
     this.message = params.message || "";
     this.time = params.time || 0;
+    this.levelType = this.getLevelType();
+    this.prettyTime = (new Date(this.time * 1000)).toPrettyString();
 }
 
 
-RemonMessage.prototype.draw = function() {
-    var levelType = "";
-
+RemonMessage.prototype.getLevelType = function() {
     switch (this.level) {
         case "FINEST":
         case "FINER":
         case "FINE":
-            levelType = "success";
-            break;
+            return "success";
 
         case "CONFIG":
         case "INFO":
-            levelType = "info";
-            break;
+            return "info";
  
         case "WARNING":
-            levelType = "warning";
-            break;
+            return "warning";
 
         case "SEVERE":
-            levelType = "error";
-            break;
+            return "error";
 
         default:
-            levelType = "success";
-            break;
+            return "default";
     }
+}
 
+RemonMessage.prototype.draw = function() {
     var source = $('#template-message').html();
     var template = Handlebars.compile(source);
-    var context = {
-        message: this.message,
-        level: this.level,
-        levelType: levelType,
-    };
-    $('#message-logs').append(template(context));
+    $('#message-logs').append(template(this));
 }
