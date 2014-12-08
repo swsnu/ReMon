@@ -1,6 +1,7 @@
 package edu.snu.cms.remon.collector.evaluator;
 
 import edu.snu.cms.remon.collector.Codec;
+import edu.snu.cms.remon.collector.Message;
 import edu.snu.cms.remon.collector.Metric;
 import org.apache.reef.driver.task.TaskConfigurationOptions;
 import org.apache.reef.tang.annotations.Parameter;
@@ -18,7 +19,8 @@ public class RemonLogger implements TaskMessageSource {
   public static final String MSG_SOURCE = "remon";
   private static final Logger LOG = Logger.getLogger(RemonLogger.class.getName());
   // TODO Which would be a good value for Metric.Source?
-  private List<Metric> logs = new ArrayList<>();
+  private List<Metric> metrics = new ArrayList<>();
+  private List<Message> messages = new ArrayList<>();
   private final String taskId;
 
   @Inject
@@ -26,22 +28,23 @@ public class RemonLogger implements TaskMessageSource {
     this.taskId = taskId;
   }
 
-  private void addToLog(final String tag, final String str) {
-    LOG.log(Level.SEVERE, str);
+  private void addMetric(final String tag, final double value) {
     final long time = System.currentTimeMillis();
-    final Metric newMetric = Metric.newBuilder().setSourceId(taskId).setTag(tag).setTime(time).build();
-    logs.add(newMetric);
+    final Metric newMetric = Metric.newBuilder().setSourceId(taskId).setTag(tag).setTime(time).setValue(value).build();
+    metrics.add(newMetric);
   }
-
-  public void log(final Level level, final String str) {
-    addToLog(level.toString(), str);
+  private void addMessage(final String level, final String msg) {
+    final long time = System.currentTimeMillis();
+    final Message newMessage = Message.newBuilder().setSourceId(taskId).setLevel(level).setTime(time).setMessage(msg).build();
+    messages.add(newMessage);
   }
 
   public void value(final String tag, final double value) {
-    LOG.log(Level.SEVERE, "new Value " + value + "is added");
-    final long time = System.currentTimeMillis();
-    final Metric newMetric = Metric.newBuilder().setSourceId(taskId).setTag(tag).setTime(time).setValue(value).build();
-    logs.add(newMetric);
+    addMetric(tag, value);
+  }
+
+  public void log(final Level level, final String msg) {
+    addMessage(level.getName(), msg);
   }
 
   /**
@@ -52,8 +55,9 @@ public class RemonLogger implements TaskMessageSource {
   @Override
   public Optional<TaskMessage> getMessage() {
     // TODO Define a codec and encode the logs with it
-    final TaskMessage msg =  TaskMessage.from(MSG_SOURCE, new Codec().encode(new ArrayList(logs)));
-    logs.clear();
+    final TaskMessage msg =  TaskMessage.from(MSG_SOURCE, new Codec().encode(null));
+    metrics.clear();
+    messages.clear();
     return Optional.of(msg);
   }
 }

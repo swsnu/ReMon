@@ -14,21 +14,37 @@
 {
   "namespace" : "edu.snu.cms.remon.collector",
   "type" : "record",
-  "name" : "op",
-  "type" : "record",
-  "name" : "Metrics",
+  "name" : "Message",
   "fields" :
   [
-    {
-      "name" : "app_id",
-      "type" : "string"
-    },
+    { "name" : "source_id", "type" : "string" },
+    { "name" : "level", "type" : "string" },
+    { "name" : "time", "type" : "long" },
+    { "name" : "message", "type" : "string" }
+  ]
+},
+{
+  "namespace" : "edu.snu.cms.remon.collector",
+  "type" : "record",
+  "name" : "Data",
+  "fields" :
+  [
+    { "name" : "op", "type" : "string" },
+    { "type" : "string", "name" : "app_id"},
     {
       "name" : "metrics",
       "type" :
       {
         "type" : "array",
         "items" : "Metric"
+      }
+    },
+    {
+      "name" : "messages",
+      "type" :
+      {
+        "type" : "array",
+        "items" : "Message"
       }
     }
   ]
