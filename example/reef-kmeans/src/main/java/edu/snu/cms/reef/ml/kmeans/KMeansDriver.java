@@ -194,6 +194,8 @@ public final class KMeansDriver {
               .set(TaskConfiguration.IDENTIFIER, KMeansControllerTask.TASK_ID)
               .set(TaskConfiguration.TASK, KMeansControllerTask.class)
               .set(TaskConfiguration.ON_SEND_MESSAGE, RemonLogger.class)
+              .set(TaskConfiguration.ON_TASK_STARTED, RemonStartTaskHandler.class)
+              .set(TaskConfiguration.ON_TASK_STOP, RemonStopTaskHandler.class)
               .build(),
             kMeansParameters.getCtrlTaskConfiguration());
 
@@ -207,6 +209,8 @@ public final class KMeansDriver {
               .set(TaskConfiguration.IDENTIFIER, "CmpTask-" + taskId.getAndIncrement())
               .set(TaskConfiguration.TASK, KMeansComputeTask.class)
               .set(TaskConfiguration.ON_SEND_MESSAGE, RemonLogger.class)
+              .set(TaskConfiguration.ON_TASK_STARTED, RemonStartTaskHandler.class)
+              .set(TaskConfiguration.ON_TASK_STOP, RemonStopTaskHandler.class)
               .build(),
             kMeansParameters.getCompTaskConfiguration());
         }
@@ -240,6 +244,8 @@ public final class KMeansDriver {
             .set(TaskConfiguration.IDENTIFIER, failedTask.getId() + "-R")
             .set(TaskConfiguration.TASK, KMeansComputeTask.class)
             .set(TaskConfiguration.ON_SEND_MESSAGE, RemonLogger.class)
+            .set(TaskConfiguration.ON_TASK_STARTED, RemonStartTaskHandler.class)
+            .set(TaskConfiguration.ON_TASK_STOP, RemonStopTaskHandler.class)
             .build())
         .build();
 
