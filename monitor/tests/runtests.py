@@ -129,15 +129,9 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
     @gen_test
     def test_history(self):
         ws = yield self.ws_connect()
-        payload = {
+        ws.write_message(json_encode({
             'op': 'clear',
-        }
-        ws.write_message(json_encode(payload))
-        response = yield self.wait_response(ws)
-        payload = {
-            'op': 'subscribe',
-        }
-        ws.write_message(json_encode(payload))
+        }))
         response = yield self.wait_response(ws)
 
         n_times = 5
@@ -159,13 +153,11 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
         }
         for _ in xrange(n_times):
             ws.write_message(json_encode(payload))
-            response = yield self.wait_response(ws)
 
-        payload = {
+        ws.write_message(json_encode({
             'op': 'history',
             'app_id': 'TEST_APP_ID',
-        }
-        ws.write_message(json_encode(payload))
+        }))
         response = yield self.wait_response(ws)
         expected_response = {
             'op': 'history',
@@ -193,6 +185,10 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
         payload = {
             'op': 'undefined',
         }
-        with self.assertRaises(gen.TimeoutError) as context:
-            response = yield self.wait_response(ws)
+        ws.write_message(json_encode(payload))
+        response = yield self.wait_response(ws)
+        self.assertIn('op', response)
+        self.assertIn('error', response)
+        self.assertEqual(payload['op'], response['op'])
+        self.assertTrue(response['error'])
         ws.close()
