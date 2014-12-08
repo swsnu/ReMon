@@ -49,10 +49,11 @@ if options.collector or options.alltest:
     os.chdir('../collector')
     print "##### Collector Unit Test #####"
     if options.coverage:
+        subprocess.call(['mvn', 'clean', 'install'])
         collector_test = subprocess.call(['mvn', 'cobertura:cobertura'])
         webbrowser.open('target/site/cobertura/index.html')
     else:
-        collector_test = subprocess.call(['mvn', 'test'])
+        collector_test = subprocess.call(['mvn', 'clean', 'install'])
 
 if options.monitor or options.alltest:
     os.chdir('../monitor')
