@@ -46,7 +46,10 @@ monitor_test = 0
 collector_test = 0
 
 if options.collector or options.alltest:
-    os.chdir('../collector')
+    os.chdir('../../../../reef')
+    subprocess.call(['git', 'pull'])
+    subprocess.call(['mvn', 'clean', 'install', '-DskipTests'])
+    os.chdir('../jobs/ReMon Build/workspace/collector')
     print "##### Collector Unit Test #####"
     if options.coverage:
         subprocess.call(['mvn', 'clean', 'install'])
