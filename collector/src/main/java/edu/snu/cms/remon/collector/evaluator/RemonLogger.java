@@ -1,8 +1,6 @@
 package edu.snu.cms.remon.collector.evaluator;
 
-import edu.snu.cms.remon.collector.Codec;
-import edu.snu.cms.remon.collector.Message;
-import edu.snu.cms.remon.collector.Metric;
+import edu.snu.cms.remon.collector.*;
 import org.apache.reef.driver.task.TaskConfigurationOptions;
 import org.apache.reef.tang.annotations.Parameter;
 import org.apache.reef.task.TaskMessage;
@@ -21,6 +19,7 @@ public class RemonLogger implements TaskMessageSource {
   // TODO Which would be a good value for Metric.Source?
   private List<Metric> metrics = new ArrayList<>();
   private List<Message> messages = new ArrayList<>();
+  private List<Event> events = new ArrayList<>();
   private final String taskId;
 
   @Inject
@@ -33,10 +32,25 @@ public class RemonLogger implements TaskMessageSource {
     final Metric newMetric = Metric.newBuilder().setSourceId(taskId).setTag(tag).setTime(time).setValue(value).build();
     metrics.add(newMetric);
   }
+
   private void addMessage(final String level, final String msg) {
     final long time = System.currentTimeMillis();
     final Message newMessage = Message.newBuilder().setSourceId(taskId).setLevel(level).setTime(time).setMessage(msg).build();
     messages.add(newMessage);
+  }
+
+  private void addEvent(final String tag, final EventType type) {
+    final long time = System.currentTimeMillis();
+    final Event newEvent = Event.newBuilder().setSourceId(taskId).setTag(tag).setTime(time).setType(type).build();
+    events.add(newEvent);
+  }
+
+  public void start(final String tag) {
+    event(tag, EventType.START);
+  }
+
+  public void end(final String tag) {
+    event(tag, EventType.END);
   }
 
   public void value(final String tag, final double value) {
@@ -47,6 +61,10 @@ public class RemonLogger implements TaskMessageSource {
     addMessage(level.getName(), msg);
   }
 
+  public void event(final String tag, final EventType type) {
+    addEvent(tag, type);
+  }
+
   /**
    * Invoked when a Task is alarmed to send a heartbeat message.
    * It writes the message with collected values.
@@ -54,8 +72,9 @@ public class RemonLogger implements TaskMessageSource {
    */
   @Override
   public Optional<TaskMessage> getMessage() {
-    // TODO Define a codec and encode the logs with it
-    final TaskMessage msg =  TaskMessage.from(MSG_SOURCE, new Codec().encode(null));
+    // TODO : we should retrieve APPID automatic-manner. currently "K-means" is hardcoded.
+    final Data data = new Data("insert", "K-means", metrics, messages, events);
+    final TaskMessage msg = TaskMessage.from(MSG_SOURCE, new Codec().encode(data));
     metrics.clear();
     messages.clear();
     return Optional.of(msg);
