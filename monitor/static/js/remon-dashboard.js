@@ -23,41 +23,8 @@ RemonDashboard.prototype.addMetric = function(metric) {
 
 
 RemonDashboard.prototype.addMessage = function(message) {
-    var levelType = "";
-
-    switch (message.level) {
-        case "FINEST":
-        case "FINER":
-        case "FINE":
-            levelType = "success";
-            break;
-
-        case "CONFIG":
-        case "INFO":
-            levelType = "info";
-            break;
- 
-        case "WARNING":
-            levelType = "warning";
-            break;
-
-        case "SEVERE":
-            levelType = "error";
-            break;
-
-        default:
-            levelType = "success";
-            break;
-    }
-
-    var source = $('#template-message').html();
-    var template = Handlebars.compile(source);
-    var context = {
-        message: message.message,
-        level: message.level,
-        levelType: levelType,
-    };
-    $('#message-logs').append(template(context));
+    var message = new RemonMessage(message);
+    message.draw();
 }
 
 
