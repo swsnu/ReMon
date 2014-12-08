@@ -33,8 +33,8 @@ public class TestCodec {
 
     Data data = new Data("insert", "app1", metrics, messages);
 
-    bArray = new Codec().encode(null);
+    bArray = new Codec().encode(data);
     Data decodedvalues = new Codec().decode(bArray);
-    assertEquals(decodedvalues, metrics);
+    assertEquals(decodedvalues, data);
   }
 }
