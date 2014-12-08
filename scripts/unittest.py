@@ -45,7 +45,7 @@ if not (options.collector or options.monitor or options.alltest):
 monitor_test = 0
 collector_test = 0
 
-if options.collector:
+if options.collector or options.alltest:
     os.chdir('../collector')
     print "##### Collector Unit Test #####"
     if options.coverage:
@@ -54,7 +54,7 @@ if options.collector:
     else:
         monitor = subprocess.call(['mvn', 'test'])
 
-if options.monitor:
+if options.monitor or options.alltest:
     os.chdir('../monitor')
     print "##### Monitor Unit Test #####"
     if options.coverage:
