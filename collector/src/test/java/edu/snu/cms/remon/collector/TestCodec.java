@@ -21,6 +21,7 @@ public class TestCodec {
     byte[] bArray;
     List<Metric> metrics;
     List<Message> messages;
+    List<Event> events;
 
     metrics = new ArrayList<>();
     for (int i = 0; i < 20; i++) {
@@ -30,8 +31,12 @@ public class TestCodec {
     for (int i = 0; i < 20; i++) {
       messages.add(new Message("app1", "app1" + i, (long) i, "test"));
     }
+    events = new ArrayList<>();
+    for (int i = 0; i < 20; i++) {
+      events.add(new Event("app1", "TASK", (long) i, EventType.START));
+    }
 
-    Data data = new Data("insert", "app1", metrics, messages);
+    Data data = new Data("insert", "app1", metrics, messages, events);
 
     bArray = new Codec().encode(data);
     Data decodedvalues = new Codec().decode(bArray);
