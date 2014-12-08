@@ -15,3 +15,7 @@
 #footer.enlarged {
     height: 200px;
 }
+
+#footer #message-logs li {
+    margin-top: 10px;
+}

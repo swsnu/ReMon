@@ -32,37 +32,41 @@ RemonDashboard.prototype.addMetric = function(metric) {
 
 
 RemonDashboard.prototype.addMessage = function(message) {
-    var alertType = "";
+    var levelType = "";
 
     switch (message.level) {
         case "FINEST":
         case "FINER":
         case "FINE":
-            alertType = "success";
+            levelType = "success";
             break;
 
         case "CONFIG":
         case "INFO":
-            alertType = "info";
+            levelType = "info";
             break;
  
         case "WARNING":
-            alertType = "warning";
+            levelType = "warning";
             break;
 
         case "SEVERE":
-            alertType = "error";
+            levelType = "error";
             break;
 
         default:
-            alertType = "success";
+            levelType = "success";
             break;
     }
 
     var source = $('#template-message').html();
     var template = Handlebars.compile(source);
-    var context = { alertType: alertType, message: message.message };
-    $('#message-box').append(template(context));
+    var context = {
+        message: message.message,
+        level: message.level,
+        levelType: levelType,
+    };
+    $('#message-logs').append(template(context));
 }
 
 
@@ -77,7 +81,7 @@ RemonDashboard.prototype.showAppList = function() {
 
 RemonDashboard.prototype.changeApp = function(appId) {
     $('#metric-box').empty();
-    $('#message-box').empty();
+    $('#message-logs').empty();
     $('.navbar-brand').html('App &raquo; ' + appId);
     this.appId = appId;
     this.graphs = {};
