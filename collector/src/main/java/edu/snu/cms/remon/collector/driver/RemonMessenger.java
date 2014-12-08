@@ -41,7 +41,7 @@ public class RemonMessenger implements EventHandler<TaskMessage> {
    */
   @Override
   public void onNext(org.apache.reef.driver.task.TaskMessage value) {
-    final List<Metric> metricList = new Codec().decode(value.get());
+    final Data data = new Codec().decode(value.get());
 
     // Add the number of evaluators as a metric
 /*    metricList.add(new Metric(reefStateManager.getDriverEndpointIdentifier(), "NumEval", System.currentTimeMillis(), (double)reefStateManager.getEvaluators().size()));
@@ -54,15 +54,15 @@ public class RemonMessenger implements EventHandler<TaskMessage> {
     */
 
     // TODO Specify App1 to be the applicationId of this app
-    final Metrics metrics = new Metrics(appId, metricList);
+    //final Metrics metrics = new Metrics(appId, metricList);
     final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-
+/*
     try {
       MetricSerializer.toStream(metrics, stream);
     } catch (IOException e) {
       e.printStackTrace();
     }
-
+*/
     ByteBuffer buf = ByteBuffer.wrap(stream.toByteArray());
     client = new WebSocketClient();
     socket = new SimpleEchoSocket(buf);

@@ -19,14 +19,22 @@ public class TestCodec {
   @Test
   public void testEncodeDecode() {
     byte[] bArray;
-    List<Metric> values;
+    List<Metric> metrics;
+    List<Message> messages;
 
-    values = new ArrayList<>();
+    metrics = new ArrayList<>();
     for (int i = 0; i < 20; i++) {
-      values.add(new Metric("Src1", "Test" + i, (long)i, 0.5 + i));
+      metrics.add(new Metric("app1", "Test" + i, (long) i, 0.5 + i));
     }
-    bArray = new Codec().encode(values);
-    List<Metric> decodedvalues = new Codec().decode(bArray);
-    assertEquals(decodedvalues, values);
+    messages = new ArrayList<>();
+    for (int i = 0; i < 20; i++) {
+      messages.add(new Message("app1", "app1" + i, (long) i, "test"));
+    }
+
+    Data data = new Data("insert", "app1", metrics, messages);
+
+    bArray = new Codec().encode(null);
+    Data decodedvalues = new Codec().decode(bArray);
+    assertEquals(decodedvalues, metrics);
   }
 }

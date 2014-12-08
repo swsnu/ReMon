@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Codec which converts between Metrics and JSON string
  */
-public class Codec implements org.apache.reef.io.serialization.Codec<List<Metric>> {
+public class Codec implements org.apache.reef.io.serialization.Codec<Data> {
   private static Codec codec;
 
   public static Codec getCodec() {
@@ -20,10 +20,10 @@ public class Codec implements org.apache.reef.io.serialization.Codec<List<Metric
   }
 
   @Override
-  public byte[] encode(List<Metric> obj) {
+  public byte[] encode(Data data) {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      MetricSerializer.toStream(new Metrics("appId", obj), baos);
+      DataSerializer.toStream(data, baos);
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -31,18 +31,18 @@ public class Codec implements org.apache.reef.io.serialization.Codec<List<Metric
   }
 
   @Override
-  public List<Metric> decode(byte[] buf) {
+  public Data decode(byte[] buf) {
     ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-    Metrics metrics = null;
+    Data data = null;
 
     try {
-      metrics = MetricSerializer.fromStream(bis);
+      data = DataSerializer.fromStream(bis);
     } catch (IOException e) {
       e.printStackTrace();
     }
-    if (metrics == null)
+    if (data == null)
       return null;
 
-    return metrics.getMetrics();
+    return data;
   }
 }

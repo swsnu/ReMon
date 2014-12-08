@@ -26,13 +26,11 @@
 {
   "namespace" : "edu.snu.cms.remon.collector",
   "type" : "record",
-  "name" : "op",
-  "type" : "string"
-  "name" : "app_id",
-  "type" : "record",
-  "name" : "Metrics",
+  "name" : "Data",
   "fields" :
   [
+    { "name" : "op", "type" : "string" },
+    { "type" : "string", "name" : "app_id"},
     {
       "name" : "metrics",
       "type" :
@@ -40,12 +38,7 @@
         "type" : "array",
         "items" : "Metric"
       }
-    }
-  ]
-  "type" : "record",
-  "name" : "Messages",
-  "fields" :
-  [
+    },
     {
       "name" : "messages",
       "type" :
