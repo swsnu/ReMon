@@ -9,23 +9,14 @@ function RemonDashboard(params) {
 }
 
 
-RemonDashboard.prototype.addGraph = function(tagName) {
-    if (tagName in this.graphs === false) {
-        var id = Object.keys(this.graphs).length;
-        var graph = new RemonTimeseriesGraph({ id: id, name: tagName });
-
-        var source = $('#template-graph').html();
-        var template = Handlebars.compile(source);
-
-        $('#metric-box').append(template(graph));
-        graph.draw();
-        this.graphs[tagName] = graph;
-    }
-}
-
-
 RemonDashboard.prototype.addMetric = function(metric) {
-    this.addGraph(metric.tag);
+    if (metric.tag in this.graphs === false) {
+        var id = Object.keys(this.graphs).length;
+        var graph = new RemonTimeseriesGraph({ id: id, name: metric.tag });
+        this.graphs[metric.tag] = graph;
+        graph.draw();
+    }
+
     var graph = this.graphs[metric.tag];
     graph.addValue(metric.time, metric.value);
 }

@@ -32,31 +32,33 @@ function RemonTimeseriesGraph(params) {
 
 
 RemonTimeseriesGraph.prototype.draw = function() {
+    var source = $('#template-graph').html();
+    var template = Handlebars.compile(source);
+    $('#metric-box').append(template(this));
+
     var element = document.getElementById(this.chartId);
 
-    if (element !== null && this.graph === null) {
-        this.graph = new Rickshaw.Graph({
-            element: element,
-            width: element.offsetWidth,
-            height: element.offsetWidth * this.aspectRatio,
-            renderer: 'line',
-            series: [{ color: 'steelblue', name: this.name, data: this.data }],
-        });
-        this.graph.render();
+    this.graph = new Rickshaw.Graph({
+        element: element,
+        width: element.offsetWidth,
+        height: element.offsetWidth * this.aspectRatio,
+        renderer: 'line',
+        series: [{ color: 'steelblue', name: this.name, data: this.data }],
+    });
+    this.graph.render();
 
-        var hoverDetail = new Rickshaw.Graph.HoverDetail({
-            graph: this.graph,
-            xFormatter: function(x) {
-                return (new Date(x * 1000)).toString();
-            },
-        });
+    var hoverDetail = new Rickshaw.Graph.HoverDetail({
+        graph: this.graph,
+        xFormatter: function(x) {
+            return (new Date(x * 1000)).toString();
+        },
+    });
 
-        var xAxis = new Rickshaw.Graph.Axis.Time({
-            graph: this.graph,
-            timeFixture: new Rickshaw.Fixtures.Time.Local(),
-        });
-        xAxis.render();
-    }
+    var xAxis = new Rickshaw.Graph.Axis.Time({
+        graph: this.graph,
+        timeFixture: new Rickshaw.Fixtures.Time.Local(),
+    });
+    xAxis.render();
 }
 
 
