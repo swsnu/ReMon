@@ -3,6 +3,7 @@ package edu.snu.cms.remon.collector.evaluator;
 import edu.snu.cms.remon.collector.Codec;
 import edu.snu.cms.remon.collector.Message;
 import edu.snu.cms.remon.collector.Metric;
+import edu.snu.cms.remon.collector.parameter.Event;
 import org.apache.reef.driver.task.TaskConfigurationOptions;
 import org.apache.reef.tang.annotations.Parameter;
 import org.apache.reef.task.TaskMessage;
@@ -37,6 +38,14 @@ public class RemonLogger implements TaskMessageSource {
     final long time = System.currentTimeMillis();
     final Message newMessage = Message.newBuilder().setSourceId(taskId).setLevel(level).setTime(time).setMessage(msg).build();
     messages.add(newMessage);
+  }
+
+  public void start(final String tag) {
+    value(tag, Event.START.getValue());
+  }
+
+  public void end(final String tag) {
+    value(tag, Event.END.getValue());
   }
 
   public void value(final String tag, final double value) {
