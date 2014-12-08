@@ -24,17 +24,17 @@ RemonDashboard.prototype.addGraph = function(tagName) {
 }
 
 
-RemonDashboard.prototype.addMetric = function(tagName, time, value) {
-    this.addGraph(tagName);
-    var graph = this.graphs[tagName];
-    graph.addValue(time, value);
+RemonDashboard.prototype.addMetric = function(metric) {
+    this.addGraph(metric.tag);
+    var graph = this.graphs[metric.tag];
+    graph.addValue(metric.time, metric.value);
 }
 
 
-RemonDashboard.prototype.addMessage = function(level, message) {
+RemonDashboard.prototype.addMessage = function(message) {
     var alertType = "";
 
-    switch (level) {
+    switch (message.level) {
         case "FINEST":
         case "FINER":
         case "FINE":
@@ -61,7 +61,7 @@ RemonDashboard.prototype.addMessage = function(level, message) {
 
     var source = $('#template-message').html();
     var template = Handlebars.compile(source);
-    var context = { alertType: alertType, message: message };
+    var context = { alertType: alertType, message: message.message };
     $('#message-box').append(template(context));
 }
 
@@ -79,7 +79,6 @@ RemonDashboard.prototype.changeApp = function(appId) {
     $('#metric-box').empty();
     $('#message-box').empty();
     $('.navbar-brand').html('App &raquo; ' + appId);
-    this.rs.send({ op: 'unsubscribe', app_id: this.appId });
     this.appId = appId;
     this.graphs = {};
     this.rs.send({ op: 'subscribe', app_id: appId });
@@ -92,11 +91,13 @@ RemonDashboard.prototype.callback = function(data) {
         this.appList = data.app_list;
         this.showAppList();
     }
-    else if (data.op === 'metrics') {
-        this.addMetric(data.tag, data.time, data.value);
-    }
-    else if (data.op == 'messages') {
-        this.addMessage(data.level, data.message);
+    else if (data.op === 'insert' || data.op === 'history') {
+        for (var i in data.metrics) {
+            this.addMetric(data.metrics[i]);
+        }
+        for (var i in data.messages) {
+            this.addMessage(data.messages[i]);
+        }
     }
     else {
         console.log('Undefined opcode:', data.op);
