@@ -20,6 +20,7 @@ class Application(tornado.web.Application):
             'static_path': os.path.join(os.path.dirname(__file__), 'static'),
             'table_metrics_prefix': 'table_metrics_',
             'table_messages_prefix': 'table_messages_',
+            'table_analytics': 'analytics',
         }
         handlers = [
             (r'/', MainHandler),
@@ -82,6 +83,13 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
         data = json_decode(message)
         op = data.get('op')
         app_id = data.get('app_id')
+
+        # Monitor user behavior using an analytics framework.
+        # Access time is logged automatically.
+        yield self.db[self.settings['table_analytics']].insert({
+            'ip': self.request.remote_ip,
+            'op': op,
+        })
 
         if op == 'insert':
             self.mq.publish(app_id, message)
