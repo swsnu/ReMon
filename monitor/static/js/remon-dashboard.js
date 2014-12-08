@@ -33,14 +33,14 @@ RemonDashboard.prototype.showAppList = function() {
     var template = Handlebars.compile(source);
     var context = { apps: this.appList };
     $('#metric-box').html(template(context))
-    $('.navbar-brand').text('App List');
+    $('.navbar-brand').text('ReMon');
 }
 
 
 RemonDashboard.prototype.changeApp = function(appId) {
     $('#metric-box').empty();
     $('#message-logs').empty();
-    $('.navbar-brand').html('App &raquo; ' + appId);
+    $('.navbar-brand').html('ReMon &raquo; ' + appId);
     this.appId = appId;
     this.graphs = {};
     this.rs.send({ op: 'subscribe', app_id: appId });
