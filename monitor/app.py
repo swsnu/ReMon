@@ -18,8 +18,8 @@ class Application(tornado.web.Application):
     def __init__(self):
         settings = {
             'static_path': os.path.join(os.path.dirname(__file__), 'static'),
-            'metric_table_prefix': 'metric_',
-            'message_table_prefix': 'message_',
+            'table_metrics_prefix': 'table_metrics_',
+            'table_messages_prefix': 'table_messages_',
         }
         handlers = [
             (r'/', MainHandler),
@@ -79,61 +79,85 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
 
     @tornado.gen.coroutine
     def on_message(self, message):
-        metric_table_prefix = self.settings['metric_table_prefix']
-        message_table_prefix = self.settings['message_table_prefix']
-
         data = json_decode(message)
         op = data.get('op')
         app_id = data.get('app_id')
 
-        if op == 'list':
-            prefix = metric_table_prefix
+        if op == 'insert':
+            self.mq.publish(app_id, message)
+
+            metrics = data['metrics']
+            assert(isinstance(metrics, list))
+            prefix = self.settings['table_metrics_prefix']
+            yield self.db[prefix + app_id].insert(metrics)
+
+            messages = data['messages']
+            assert(isinstance(messages, list))
+            prefix = self.settings['table_messages_prefix']
+            yield self.db[prefix + app_id].insert(messages)
+
+        elif op == 'list':
             table_names = yield self.db.collection_names()
-            app_names = filter(lambda n: n.startswith(prefix), table_names)
-            app_list = map(lambda n: {'app_id': n[len(prefix):]}, app_names)
-            self.write_message(json_encode({'op': op, 'app_list': app_list}))
+
+            candidates = set()
+            for name in table_names:
+                prefix = self.settings['table_metrics_prefix']
+                if name.startswith(prefix):
+                    candidates.add(name[len(prefix):])
+
+                prefix = self.settings['table_messages_prefix']
+                if name.startswith(prefix):
+                    candidates.add(name[len(prefix):])
+
+            app_list = [{'app_id': app_id} for app_id in candidates]
+
+            self.write_message(json_encode({
+                'op': 'list',
+                'app_list': app_list,
+            }))
 
         elif op == 'subscribe':
             self.mq.register(self, app_id)
-            self.write_message(json_encode({'op': op}))
-
-        elif op == 'metrics':
-            metrics = data['metrics']
-            assert(isinstance(metrics, list))
-            for item in metrics:
-                item['op'] = 'metrics'
-                self.mq.publish(app_id, json_encode(item))
-            table_name = metric_table_prefix + app_id
-            yield self.db[table_name].insert(metrics)
-
-        elif op == 'messages':
-            messages = data['messages']
-            assert(isinstance(messages, list))
-            for item in messages:
-                item['op'] = 'messages'
-                self.mq.publish(app_id, json_encode(item))
-            table_name = message_table_prefix + app_id
-            yield self.db[table_name].insert(messages)
+            self.write_message(message)
 
         elif op == 'history':
-            for prefix in [metric_table_prefix, message_table_prefix]:
-                cursor = self.db[prefix + app_id].find()
-                while (yield cursor.fetch_next):
-                    item = cursor.next_object()
-                    if prefix == metric_table_prefix:
-                        item['op'] = 'metrics'
-                    else:
-                        item['op'] = 'messages'
-                    item.pop('_id', None)
-                    self.write_message(json_encode(item))
+            response = {
+                'op': 'history',
+                'app_id': app_id,
+                'metrics': [],
+                'messages': [],
+            }
+
+            prefix = self.settings['table_metrics_prefix']
+            cursor = self.db[prefix + app_id].find()
+            while (yield cursor.fetch_next):
+                item = cursor.next_object()
+                item.pop('_id', None)
+                response['metrics'].append(item)
+
+            prefix = self.settings['table_messages_prefix']
+            cursor = self.db[prefix + app_id].find()
+            while (yield cursor.fetch_next):
+                item = cursor.next_object()
+                item.pop('_id', None)
+                response['messages'].append(item)
+
+            self.write_message(json_encode(response))
 
         elif op == 'clear':
-            for prefix in [metric_table_prefix, message_table_prefix]:
-                yield self.db[prefix + app_id].remove()
-            self.write_message(json_encode({'op': op}))
+            table_names = yield self.db.collection_names()
+            for name in table_names:
+                if name.startswith(self.settings['table_metrics_prefix']) or\
+                   name.startswith(self.settings['table_messages_prefix']):
+                    yield self.db[name].remove()
+            self.write_message(message)
 
         else:
-            raise NotImplementedError('Undefined opcode: %s' % op)
+            self.write_message(json_encode({
+                'op': op,
+                'error': True,
+                'error_reason': 'Undefined opcode: %s' % op,
+            }))
 
 
 if __name__ == '__main__':
