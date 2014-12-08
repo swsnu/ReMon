@@ -45,15 +45,14 @@ public class RemonMessenger implements EventHandler<TaskMessage> {
     final Data data = new Codec().decode(value.get());
 
     // TODO Specify App1 to be the applicationId of this app
-    //final Metrics metrics = new Metrics(appId, metricList);
     final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-/*
+
     try {
-      MetricSerializer.toStream(metrics, stream);
+      DataSerializer.toStream(data, stream);
     } catch (IOException e) {
       e.printStackTrace();
     }
-*/
+
     ByteBuffer buf = ByteBuffer.wrap(stream.toByteArray());
     client = new WebSocketClient();
     socket = new SimpleEchoSocket(buf);
