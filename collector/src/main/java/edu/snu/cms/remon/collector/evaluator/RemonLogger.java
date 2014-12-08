@@ -1,8 +1,10 @@
 package edu.snu.cms.remon.collector.evaluator;
 
 import edu.snu.cms.remon.collector.Codec;
+import edu.snu.cms.remon.collector.Data;
 import edu.snu.cms.remon.collector.Message;
 import edu.snu.cms.remon.collector.Metric;
+import edu.snu.cms.remon.collector.parameter.Event;
 import org.apache.reef.driver.task.TaskConfigurationOptions;
 import org.apache.reef.tang.annotations.Parameter;
 import org.apache.reef.task.TaskMessage;
@@ -39,6 +41,14 @@ public class RemonLogger implements TaskMessageSource {
     messages.add(newMessage);
   }
 
+  public void start(final String tag) {
+    value(tag, Event.START.getValue());
+  }
+
+  public void end(final String tag) {
+    value(tag, Event.END.getValue());
+  }
+
   public void value(final String tag, final double value) {
     addMetric(tag, value);
   }
@@ -54,8 +64,9 @@ public class RemonLogger implements TaskMessageSource {
    */
   @Override
   public Optional<TaskMessage> getMessage() {
-    // TODO Define a codec and encode the logs with it
-    final TaskMessage msg =  TaskMessage.from(MSG_SOURCE, new Codec().encode(null));
+    // TODO : we should retrieve APPID automatic-manner. currently "K-means" is hardcoded.
+    final Data data = new Data("insert", "K-means", metrics, messages);
+    final TaskMessage msg =  TaskMessage.from(MSG_SOURCE, new Codec().encode(data));
     metrics.clear();
     messages.clear();
     return Optional.of(msg);
