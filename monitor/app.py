@@ -106,6 +106,7 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
 
         elif op == 'list':
             table_names = yield self.db.collection_names()
+            table_names.sort()
 
             candidates = set()
             for name in table_names:
@@ -137,14 +138,14 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             }
 
             prefix = self.settings['table_metrics_prefix']
-            cursor = self.db[prefix + app_id].find()
+            cursor = self.db[prefix + app_id].find().sort('time', 1)
             while (yield cursor.fetch_next):
                 item = cursor.next_object()
                 item.pop('_id', None)
                 response['metrics'].append(item)
 
             prefix = self.settings['table_messages_prefix']
-            cursor = self.db[prefix + app_id].find()
+            cursor = self.db[prefix + app_id].find().sort('time', 1)
             while (yield cursor.fetch_next):
                 item = cursor.next_object()
                 item.pop('_id', None)
