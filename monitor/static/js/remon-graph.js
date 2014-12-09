@@ -80,17 +80,16 @@ RemonLifecycleGraph.prototype.constructor = RemonLifecycleGraph;
 
 function RemonLifecycleGraph(params) {
     params = params || {};
-    this.startTimes = params.startTimes || {};
+    this.waitingStartEvents = {};
+    this.waitingEndEvents = {};
     RemonGraph.call(this, params);
 }
-
 
 RemonLifecycleGraph.prototype.draw = function() {
     var source = $('#template-lifecycle-graph').html();
     var template = Handlebars.compile(source);
     $('#metric-box').append(template(this));
 }
-
 
 RemonLifecycleGraph.prototype.update = function() {
     var element = document.getElementById(this.chartId);
@@ -115,34 +114,60 @@ RemonLifecycleGraph.prototype.update = function() {
 RemonLifecycleGraph.prototype.addValue = function(time, tag, type) {
     switch (type) {
         case 'START':
-            this.startTimes[tag] = time;
+            if (this.waitingEndEvents[tag] !== undefined) {
+                var pairedTime = this.waitingEndEvents[tag].shift();
+                if (this.waitingEndEvents[tag].length == 0) {
+                    delete this.waitingEndEvents[tag];
+                }
+                this.addTimeline(tag, time, pairedTime);
+            } else {
+                if (tag in this.waitingStartEvents === false) {
+                    this.waitingStartEvents[tag] = [];
+                }
+                this.waitingStartEvents[tag].push(time);
+            }
             break;
 
         case 'END':
-            if (this.startTimes[tag] !== undefined) {
-                this.data.push({
-                    'label': tag,
-                    'times': [{
-                        'starting_time': this.startTimes[tag],
-                        'ending_time': time,
-                    }],
-                });
+            if (this.waitingStartEvents[tag] !== undefined) {
+                var pairedTime = this.waitingStartEvents[tag].shift();
+                if (this.waitingStartEvents[tag].length == 0) {
+                    delete this.waitingStartEvents[tag];
+                }
+                this.addTimeline(tag, pairedTime, time);
+            } else {
+                if (tag in this.waitingEndEvents === false) {
+                    this.waitingEndEvents[tag] = [];
+                }
+                this.waitingEndEvents[tag].push(time);
             }
             break;
 
         default:
             console.log('Undefined event type', type);
     }
-    /*
-    console.log('Lifecycle.addValue', time, tag, type);
-    this.data = [
-        {label: "person a", times: [
-              {"starting_time": 1355752800000, "ending_time": 1355759900000},
-              {"starting_time": 1355767900000, "ending_time": 1355774400000}]},
-        {label: "person b", times: [
-              {"starting_time": 1355759910000, "ending_time": 1355761900000}]},
-        {label: "person c", times: [
-              {"starting_time": 1355761910000, "ending_time": 1355763910000}]},
-    ];
-    */
+}
+
+RemonLifecycleGraph.prototype.addTimeline = function(tag, startTime, endTime) {
+    var found = false;
+
+    for (var i in this.data) {
+        if (this.data[i].label === tag) {
+            this.data[i].times.push({
+                'starting_time': startTime,
+                'ending_time': endTime,
+            });
+            found = true;
+        }
+    }
+
+    if (!found) {
+        this.data.push({
+            'label': tag,
+            'times': [{
+                'starting_time': startTime,
+                'ending_time': endTime,
+            }],
+        });
+    }
 }
