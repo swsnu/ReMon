@@ -26,6 +26,7 @@ class Application(tornado.web.Application):
         }
         handlers = [
             (r'/', MainHandler),
+            (r'/analytics', AnalyticsHandler),
             (r'/websocket', WebsocketHandler),
         ]
         db_name = options.mongo_uri.rsplit('/', 1)[-1]
@@ -38,6 +39,20 @@ class MainHandler(tornado.web.RequestHandler):
 
     def get(self):
         self.render('index.html')
+
+
+class AnalyticsHandler(tornado.web.RequestHandler):
+
+    @tornado.gen.coroutine
+    def get(self):
+        db = self.application.db
+        table_name = self.settings['table_analytics']
+        rows = []
+        cursor = db[table_name].find().sort('_id', -1)
+        while (yield cursor.fetch_next):
+            item = cursor.next_object()
+            rows.append(item)
+        self.render('analytics.html', rows=rows)
 
 
 class MessageQueue(object):

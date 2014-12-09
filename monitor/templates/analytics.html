@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ReMon :: Analytics</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link type="text/css" rel="stylesheet" href="{{ static_url('css/bootstrap.min.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ static_url('css/rickshaw.min.css') }}">
+    <script type="text/javascript" src="{{ static_url('js/jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/d3.v3.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/rickshaw.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/handlebars.js') }}"></script>
+    <!--[if lt IE 9]>
+        <script type="text/javascript" src="{{ static_url('js/html5shiv.min.js') }}"></script>
+        <script type="text/javascript" src="{{ static_url('js/respond.min.js') }}"></script>
+    <![endif]-->
+</head>
+
+<body>
+<nav class="navbar navbar-default navbar-static-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">ReMon</a>
+        </div>
+        <div class="pull-right">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/analytics">Analytics</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Access IP</th>
+                        <th>Access Time</th>
+                        <th>Opcode</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td>{{ row['ip'] }}</td>
+                        <td>{{ row['_id'].generation_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>{{ row['op'] }}</td>
+                    </tr>
+                    {% end %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
