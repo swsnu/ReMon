@@ -1,5 +1,18 @@
+body {
+    margin-bottom: 20px;
+    -webkit-transition: all .8s ease;
+    -moz-transition: all .8s ease;
+    -ms-transition: all .8s ease;
+    -o-transition: all .8s ease;
+    transition: all .8s ease;
+}
+
+body.enlarged {
+    margin-bottom: 200px;
+}
+
 #footer {
-    position: absolute;
+    position: fixed;
     overflow-y: scroll;
     bottom: 0;
     width: 100%;
@@ -10,6 +23,7 @@
     -ms-transition: all .8s ease;
     -o-transition: all .8s ease;
     transition: all .8s ease;
+    border-top: 3px solid #ccc;
 }
 
 #footer.enlarged {
@@ -30,4 +44,8 @@
     height: 100%;
     z-index: 9999;
     background: url('../img/page-loader.gif') 50% 50% no-repeat rgba(255,255,255,0.5);
+}
+
+.timeline-label {
+    font-size: 12px;
 }

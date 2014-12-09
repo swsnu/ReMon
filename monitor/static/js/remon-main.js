@@ -11,6 +11,7 @@ $(document).ready(function() {
     $('#loader').show();
     $('#footer').click(function() {
         $(this).toggleClass('enlarged');
+        $('body').toggleClass('enlarged');
     });
 
     dashboard = new RemonDashboard();
