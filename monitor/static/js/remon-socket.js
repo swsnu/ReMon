@@ -32,6 +32,7 @@ RemonSocket.prototype.onOpen = function() {
     this.send({ op: 'list' });
     $('#connection').removeClass('glyphicon-remove');
     $('#connection').addClass('glyphicon-ok');
+    $('#loader').hide();
 }
 
 
@@ -39,6 +40,7 @@ RemonSocket.prototype.onClose = function() {
     console.log('Websocket closed.');
     $('#connection').removeClass('glyphicon-ok');
     $('#connection').addClass('glyphicon-remove');
+    $('#loader').show();
 }
 
 
