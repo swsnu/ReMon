@@ -109,3 +109,54 @@ RemonLifecycleGraph.prototype.addValue = function(time, tag, type) {
     /* FIXME */
     console.log('Lifecycle.addValue', time, tag, type);
 }
+
+
+RemonHistogramGraph.prototype = Object.create(RemonGraph.prototype);
+RemonHistogramGraph.prototype.constructor = RemonHistogramGraph;
+
+function RemonHistogramGraph(params) {
+    params = params || {};
+    RemonGraph.call(this, params);
+}
+
+RemonHistogramGraph.prototype.draw = function() {
+    var element = document.getElementById(this.chartId);
+
+    if (element != null && this.graph == null) {
+        this.graph = new Rickshaw.Graph({
+            element: element,
+            width: element.offsetWidth,
+            height: element.offsetWidth * this.aspectRatio,
+            renderer: 'bar',
+            series: [{
+                name: this.name,
+                data: this.data,
+                color: 'steelblue'
+            }],
+        });
+        this.graph.render();
+
+        var hoverDetail = new Rickshaw.Graph.HoverDetail({
+            graph: this.graph,
+            xFormatter: function(x) {
+                return (new Date(x * 1000)).toString();
+            },
+        });
+
+        var xAxis = new Rickshaw.Graph.Axis.Time({
+            graph: this.graph,
+            timeFixture: new Rickshaw.Fixtures.Time.Local(),
+        });
+        xAxis.render();
+    }
+}
+
+RemonHistogramGraph.prototype.addValue = function(time, value) {
+    this.data.push({ x: time, y: value });
+    this.data.sort(function(a, b) {
+        return a.x - b.x;
+    });
+    this.graph.series[0].data = this.data;
+    this.graph.update();
+    document.getElementById(this.valueId).innerHTML = value;
+}
