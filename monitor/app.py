@@ -20,6 +20,7 @@ class Application(tornado.web.Application):
             'static_path': os.path.join(os.path.dirname(__file__), 'static'),
             'table_metrics_prefix': 'table_metrics_',
             'table_messages_prefix': 'table_messages_',
+            'table_events_prefix': 'table_events_',
             'table_analytics': 'analytics',
         }
         handlers = [
@@ -104,6 +105,11 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             prefix = self.settings['table_messages_prefix']
             yield self.db[prefix + app_id].insert(messages)
 
+            events = data['events']
+            assert(isinstance(events, list))
+            prefix = self.settings['table_events_prefix']
+            yield self.db[prefix + app_id].insert(events)
+
         elif op == 'list':
             table_names = yield self.db.collection_names()
             table_names.sort()
@@ -115,6 +121,10 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
                     candidates.add(name[len(prefix):])
 
                 prefix = self.settings['table_messages_prefix']
+                if name.startswith(prefix):
+                    candidates.add(name[len(prefix):])
+
+                prefix = self.settings['table_events_prefix']
                 if name.startswith(prefix):
                     candidates.add(name[len(prefix):])
 
@@ -135,6 +145,7 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
                 'app_id': app_id,
                 'metrics': [],
                 'messages': [],
+                'events': [],
             }
 
             prefix = self.settings['table_metrics_prefix']
@@ -151,13 +162,21 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
                 item.pop('_id', None)
                 response['messages'].append(item)
 
+            prefix = self.settings['table_events_prefix']
+            cursor = self.db[prefix + app_id].find().sort('time', 1)
+            while (yield cursor.fetch_next):
+                item = cursor.next_object()
+                item.pop('_id', None)
+                response['events'].append(item)
+
             self.write_message(json_encode(response))
 
         elif op == 'clear':
             table_names = yield self.db.collection_names()
             for name in table_names:
                 if name.startswith(self.settings['table_metrics_prefix']) or\
-                   name.startswith(self.settings['table_messages_prefix']):
+                   name.startswith(self.settings['table_messages_prefix']) or\
+                   name.startswith(self.settings['table_events_prefix']):
                     yield self.db[name].remove()
             self.write_message(message)
 
