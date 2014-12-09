@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import motor
 import os.path
+import pytz
+from datetime import datetime, timedelta
+
 import tornado.gen
 import tornado.httpserver
 import tornado.ioloop
@@ -47,12 +50,35 @@ class AnalyticsHandler(tornado.web.RequestHandler):
     def get(self):
         db = self.application.db
         table_name = self.settings['table_analytics']
-        rows = []
-        cursor = db[table_name].find().sort('_id', -1)
+
+        ip = self.get_argument('ip', None)
+        query = {'ip': ip} if ip else {}
+        cursor = db[table_name].find(query).sort('_id', -1)
+
+        users = set()
+        occurrence = {'total': [], 'day': [], 'hour': []}
+        pivot_day = pytz.utc.localize(datetime.now() - timedelta(days=1))
+        pivot_hour = pytz.utc.localize(datetime.now() - timedelta(hours=1))
+
         while (yield cursor.fetch_next):
             item = cursor.next_object()
-            rows.append(item)
-        self.render('analytics.html', rows=rows)
+            access_time = item['_id'].generation_time
+            users.add(item['ip'])
+
+            occurrence['total'].append(item['op'])
+            if access_time > pivot_day:
+                occurrence['day'].append(item['op'])
+            if access_time > pivot_hour:
+                occurrence['hour'].append(item['op'])
+
+        access_count = dict((k, len(v)) for (k, v) in occurrence.items())
+        opcode_count = dict((k, dict((v.count(o), o) for o in set(v)))
+                            for (k, v) in occurrence.items())
+
+        self.render('analytics.html',
+                    users=users, ip=ip,
+                    access_count=access_count,
+                    opcode_count=opcode_count)
 
 
 class MessageQueue(object):

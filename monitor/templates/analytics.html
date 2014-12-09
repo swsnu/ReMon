@@ -39,26 +39,48 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-lg-12">
-            <table class="table">
+        <div class="col-md-12">
+        <h2>Analytics</h2>
+        <hr>
+
+        {% if ip == None %}
+        <h3>Users ({{ len(users) }})</h3>
+        <ul class="list-inline">
+            {% for u in sorted(users) %}
+            <li><a class="label label-default" href="/analytics?ip={{ u }}">{{ u }}</a></li>
+            {% end %}
+        </ul>
+        {% else %}
+        <h3>IP: {{ ip }}</h3>
+        <p><a class="label label-primary" href="/analytics">{{ ip }} &times;</a></p>
+        {% end %}
+        </div>
+    </div>
+    <hr>
+
+    <div class="row">
+        {% for (title, key) in (('Total', 'total'), ('Last 1 Day', 'day'), ('Last 1 Hour', 'hour')) %}
+        <div class="col-md-4">
+            <h3>{{ title }}</h3>
+            <p>Access count: {{ access_count[key] }}</p>
+            <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Access IP</th>
-                        <th>Access Time</th>
                         <th>Opcode</th>
+                        <th>Count</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for row in rows %}
+                    {% for (c, o) in sorted(opcode_count[key].items(), reverse=True) %}
                     <tr>
-                        <td>{{ row['ip'] }}</td>
-                        <td>{{ row['_id'].generation_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                        <td>{{ row['op'] }}</td>
+                        <td>{{ o }}</td>
+                        <td>{{ c }}</td>
                     </tr>
                     {% end %}
                 </tbody>
             </table>
         </div>
+        {% end %}
     </div>
 </div>
 </body>
