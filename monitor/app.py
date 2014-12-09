@@ -16,8 +16,10 @@ define('mongo_uri', default='mongodb://localhost:27017/remon', type=str)
 class Application(tornado.web.Application):
 
     def __init__(self):
+        base_dir = os.path.dirname(__file__)
         settings = {
-            'static_path': os.path.join(os.path.dirname(__file__), 'static'),
+            'static_path': os.path.join(base_dir, 'static'),
+            'template_path': os.path.join(base_dir, 'templates'),
             'table_metrics_prefix': 'table_metrics_',
             'table_messages_prefix': 'table_messages_',
             'table_analytics': 'analytics',
