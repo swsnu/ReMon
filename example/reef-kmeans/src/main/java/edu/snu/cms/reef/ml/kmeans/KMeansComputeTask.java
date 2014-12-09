@@ -132,9 +132,9 @@ public final class KMeansComputeTask implements Task {
 
     // 1. Start iteration
     boolean terminate = false;
-    final AtomicLong iterCount = new AtomicLong(0);
+    long iterCount = 0;
     while (!terminate) {
-      logger.event("iter"+iterCount.get(), EventType.START);
+      logger.event("iter"+iterCount, EventType.START);
       switch (ctrlMsgBroadcast.receive()) {
         case TERMINATE:
           terminate = true;
@@ -152,7 +152,7 @@ public final class KMeansComputeTask implements Task {
         default:
           break;
       }
-      logger.event("iter"+iterCount.getAndIncrement(), EventType.END);
+      logger.event("iter"+(iterCount++), EventType.END);
     }
 
     return null;

@@ -18,6 +18,7 @@ package edu.snu.cms.reef.ml.kmeans;
 import com.microsoft.reef.io.network.group.operators.*;
 import com.microsoft.reef.io.network.nggroup.api.task.CommunicationGroupClient;
 import com.microsoft.reef.io.network.nggroup.api.task.GroupCommClient;
+import edu.snu.cms.remon.collector.EventType;
 import edu.snu.cms.remon.collector.evaluator.RemonLogger;
 import org.apache.mahout.math.Vector;
 import edu.snu.cms.reef.ml.kmeans.data.Centroid;
@@ -157,8 +158,9 @@ public final class KMeansControllerTask implements Task {
   private final boolean iterateKMeansClustering(final int iteration) throws Exception {
 
     Map<Integer, VectorSum> map;
-    final AtomicLong iterCount = new AtomicLong(0);
+    long iterCount = 0;
     do {
+      logger.event("iter"+iterCount, EventType.END);
 
       topologyChanged();
 
@@ -170,6 +172,7 @@ public final class KMeansControllerTask implements Task {
       // 4. Receive vector sums and compute new cluster centroids
       map = newCentroidReduce.reduce();
 
+      logger.event("iter"+(iterCount++), EventType.END);
     } while (map == null);
 
     for (final Integer id : map.keySet()) {
