@@ -1,24 +1,34 @@
 
 
-function RemonDashboard(params) {
-    params = params || {};
-    this.appList = params.appList || [];
-    this.appId = params.appId || '';
-    this.graphs = params.graphs || {};
+function RemonDashboard() {
+    this.appList = [];
+    this.appId = '';
+    this.graphs = {};
+    this.timeline = null;
     this.rs = new RemonSocket({ callback: this.callback.bind(this) });
 }
 
 
 RemonDashboard.prototype.addMetric = function(metric) {
-    if (metric.tag in this.graphs === false) {
-        var id = Object.keys(this.graphs).length;
-        var graph = new RemonTimeseriesGraph({ id: id, name: metric.tag });
-        this.graphs[metric.tag] = graph;
+    var name = metric.tag;
+
+    /* Draw new graph if not exist */
+    if (name in this.graphs === false) {
+        var idx = Object.keys(this.graphs).length;
+        var graph = new RemonGraph({ idx: idx, name: name });
+        this.graphs[name] = graph;
         graph.draw();
     }
 
-    var graph = this.graphs[metric.tag];
-    graph.addValue(metric.time, metric.value);
+    var graph = this.graphs[name];
+    graph.addMetric(metric);
+    graph.update();
+}
+
+
+RemonDashboard.prototype.addEvent = function(ev) {
+    this.timeline.addEvent(ev);
+    this.timeline.update();
 }
 
 
@@ -28,38 +38,39 @@ RemonDashboard.prototype.addMessage = function(message) {
 }
 
 
-RemonDashboard.prototype.addEvent = function(ev) {
-    var lifecycleChartId = '__LIFECYCLE_CHART_ID__';  /* FIXME */
-    if (lifecycleChartId in this.graphs === false) {
-        var id = Object.keys(this.graphs).length;
-        var graph = new RemonLifecycleGraph({ id: id, name: 'Lifecycle' });
-        this.graphs[lifecycleChartId] = graph;
-        graph.draw();
-    }
-
-    var graph = this.graphs[lifecycleChartId];
-    graph.addValue(ev.time, ev.tag, ev.type);
-    graph.update();
-}
-
 RemonDashboard.prototype.showAppList = function() {
+    $('#mainbody').empty();
+    $('#message-box').empty();
+    $('.navbar-brand').text('ReMon');
     var source = $('#template-app-list').html();
     var template = Handlebars.compile(source);
-    var context = { apps: this.appList };
-    $('#metric-box').html(template(context));
-    $('#message-logs').empty();
-    $('.navbar-brand').text('ReMon');
+    $('#mainbody').html(template(this));
 }
 
 
-RemonDashboard.prototype.changeApp = function(appId) {
-    $('#metric-box').empty();
-    $('#message-logs').empty();
-    $('.navbar-brand').html('ReMon &raquo; ' + appId);
-    this.appId = appId;
+RemonDashboard.prototype.showApp = function() {
+    $('#mainbody').empty();
+    $('#message-box').empty();
+    $('.navbar-brand').html('ReMon &raquo; ' + this.appId);
     this.graphs = {};
-    this.rs.send({ op: 'subscribe', app_id: appId });
-    this.rs.send({ op: 'history', app_id: appId });
+    this.timeline = new RemonTimeline();
+    this.timeline.draw();
+    this.rs.send({ op: 'history', app_id: this.appId });
+}
+
+
+RemonDashboard.prototype.requestAppList = function() {
+    this.rs.send({
+        op: 'list',
+    });
+}
+
+
+RemonDashboard.prototype.requestSubscribe = function(appId) {
+    this.rs.send({
+        op: 'subscribe',
+        app_id: appId,
+    });
 }
 
 
@@ -67,6 +78,10 @@ RemonDashboard.prototype.callback = function(data) {
     if (data.op === 'list') {
         this.appList = data.app_list;
         this.showAppList();
+    }
+    else if (data.op === 'subscribe') {
+        this.appId = data.app_id;
+        this.showApp();
     }
     else if (data.op === 'insert' || data.op === 'history') {
         for (var i in data.metrics) {
@@ -80,6 +95,6 @@ RemonDashboard.prototype.callback = function(data) {
         }
     }
     else {
-        console.log('Undefined opcode:', data.op);
+        console.error('Undefined opcode:', data.op);
     }
 }

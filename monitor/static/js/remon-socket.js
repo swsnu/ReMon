@@ -6,7 +6,7 @@ function RemonSocket(params) {
     this.callback = params.callback || function(e) { console.log(e); };
     this.reconnectIntervalTime = params.reconnectIntervalTime || 1000;
     this.reconnectIntervalId = 0;
-    this.status = 'DISCONNECTED';
+    this.connected = false;
     this.connect();
 }
 
@@ -21,7 +21,7 @@ RemonSocket.prototype.getLocalUrl = function() {
 
 
 RemonSocket.prototype.connect = function() {
-    if (this.status == 'DISCONNECTED') {
+    if (this.connected === false) {
         console.log('Connecting', this.url);
         this.ws = new WebSocket(this.url);
         this.ws.onopen = this.onOpen.bind(this);
@@ -33,34 +33,31 @@ RemonSocket.prototype.connect = function() {
 
 RemonSocket.prototype.send = function(data) {
     var text = JSON.stringify(data);
+    console.log('Websocket sent:', data);
     this.ws.send(text);
-    console.log('Sent:', text);
 }
 
 
 RemonSocket.prototype.onOpen = function() {
     console.log('Websocket opened.');
-    this.send({ op: 'list' });
-    $('#connection').removeClass('glyphicon-remove');
-    $('#connection').addClass('glyphicon-ok');
     $('#loader').hide();
-    this.status = 'CONNECTED';
+    this.connected = true;
 
     if (this.reconnectIntervalId > 0) {
         clearInterval(this.reconnectIntervalId);
         this.reconnectIntervalId = 0;
     }
+
+    this.send({ op: 'list' });
 }
 
 
 RemonSocket.prototype.onClose = function() {
     console.log('Websocket closed.');
-    $('#connection').removeClass('glyphicon-ok');
-    $('#connection').addClass('glyphicon-remove');
     $('#loader').show();
-    this.status = 'DISCONNECTED';
+    this.connected = false;
 
-    if (!this.reconnectIntervalId) {
+    if (this.reconnectIntervalId == 0) {
         var self = this;
         this.reconnectIntervalId = setInterval(
             function() {
@@ -75,6 +72,6 @@ RemonSocket.prototype.onClose = function() {
 
 RemonSocket.prototype.onMessage = function(event) {
     var data = JSON.parse(event.data);
-    console.log('Received:', data);
+    console.log('Websocket received:', event.data);
     this.callback(data);
 }

@@ -47,8 +47,9 @@ RemonMessage.prototype.getLevelType = function() {
     }
 }
 
+
 RemonMessage.prototype.draw = function() {
     var source = $('#template-message').html();
     var template = Handlebars.compile(source);
-    $('#message-logs').append(template(this));
+    $('#message-box').append(template(this));
 }
