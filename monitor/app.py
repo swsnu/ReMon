@@ -175,7 +175,6 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
 
         elif op == 'list':
             table_names = yield self.db.collection_names()
-            table_names.sort()
 
             candidates = set()
             for name in table_names:
@@ -192,6 +191,7 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
                     candidates.add(name[len(prefix):])
 
             app_list = [{'app_id': app_id} for app_id in candidates]
+            app_list.sort()
 
             self.write_message(json_encode({
                 'op': 'list',
