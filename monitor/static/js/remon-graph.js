@@ -69,7 +69,9 @@ RemonTimeseriesGraph.prototype.addValue = function(time, value) {
     });
     this.graph.series[0].data = this.data;
     this.graph.update();
-    document.getElementById(this.valueId).innerHTML = value;
+
+    if (this.data[this.data.length - 1].x === time)
+        document.getElementById(this.valueId).innerHTML = value;
 }
 
 
