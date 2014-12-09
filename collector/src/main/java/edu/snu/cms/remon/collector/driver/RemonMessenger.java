@@ -1,10 +1,10 @@
 package edu.snu.cms.remon.collector.driver;
 
 import edu.snu.cms.remon.collector.*;
+import org.apache.reef.driver.parameters.DriverIdentifier;
 import org.apache.reef.driver.task.TaskMessage;
 import org.apache.reef.tang.annotations.Parameter;
 import org.apache.reef.wake.EventHandler;
-import org.apache.reef.wake.time.event.StartTime;
 import org.apache.reef.webserver.ReefEventStateManager;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
@@ -14,8 +14,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,12 +25,14 @@ public class RemonMessenger implements EventHandler<TaskMessage> {
   private SimpleEchoSocket socket;
   private final String monitorAddress;
   private final ReefEventStateManager reefStateManager;
-  private final String appId = "KMeans-"+System.currentTimeMillis();
+  private final String appId;
 
   @Inject
-  public RemonMessenger(final ReefEventStateManager reefStateManager) {
-    this.monitorAddress = "ws://remon-client.herokuapp.com:80/websocket";
+  public RemonMessenger(final ReefEventStateManager reefStateManager,
+                        @Parameter(DriverIdentifier.class) final String driverId) {
+    this.monitorAddress = "ws://192.168.43.242:8000/websocket";
     this.reefStateManager = reefStateManager;
+    this.appId = driverId + "-" + System.currentTimeMillis();
   }
 
   /**
@@ -43,6 +43,7 @@ public class RemonMessenger implements EventHandler<TaskMessage> {
   @Override
   public void onNext(org.apache.reef.driver.task.TaskMessage value) {
     final Data data = new Codec().decode(value.get());
+    data.setAppId(appId);
 
     // TODO Specify App1 to be the applicationId of this app
     final ByteArrayOutputStream stream = new ByteArrayOutputStream();
