@@ -39,14 +39,10 @@ parser.add_option(
     "--jenkins",
     dest="jenkins",
     action="store_true",
-    help="ren test as jenkins mode",
+    help="run test as jenkins mode",
     default=False)
 
 (options, args) = parser.parse_args()
-
-if not (options.collector or options.monitor or options.alltest):
-    parser.print_help()
-    sys.exit(2)
 
 if options.jenkins:
     options.alltest = True
@@ -55,6 +51,10 @@ if options.jenkins:
 if options.alltest:
     options.collector = True
     options.monitor = True
+
+if not (options.collector or options.monitor):
+    parser.print_help()
+    sys.exit(2)
 
 monitor_test = 0
 collector_test = 0
