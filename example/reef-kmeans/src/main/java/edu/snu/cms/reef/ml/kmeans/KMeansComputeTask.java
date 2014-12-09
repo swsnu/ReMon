@@ -138,8 +138,9 @@ public final class KMeansComputeTask implements Task {
     boolean terminate = false;
     long iterCount = 0;
     while (!terminate) {
+      final ControlMessage controlMessage = ctrlMsgBroadcast.receive();
       logger.event("iter"+iterCount, EventType.START);
-      switch (ctrlMsgBroadcast.receive()) {
+      switch (controlMessage) {
         case TERMINATE:
           terminate = true;
           break;
@@ -161,6 +162,7 @@ public final class KMeansComputeTask implements Task {
 
     logger.event("Task", EventType.END);
     heartBeatTriggerManager.triggerHeartBeat();
+    Thread.sleep(1000);
     return null;
   }
 
