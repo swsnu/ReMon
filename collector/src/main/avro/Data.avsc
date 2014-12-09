@@ -38,7 +38,7 @@
     { "name" : "source_id", "type" : "string" },
     { "name" : "tag", "type" : "string" },
     { "name" : "time", "type" : "long" },
-    { "type" : "EventType", "name" : "type" }
+    { "name" : "type", "type" : "EventType" }
   ]
 },
 {

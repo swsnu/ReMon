@@ -19,6 +19,7 @@ import com.microsoft.reef.io.network.group.operators.Broadcast;
 import com.microsoft.reef.io.network.group.operators.Reduce;
 import com.microsoft.reef.io.network.nggroup.api.task.CommunicationGroupClient;
 import com.microsoft.reef.io.network.nggroup.api.task.GroupCommClient;
+import edu.snu.cms.remon.collector.EventType;
 import edu.snu.cms.remon.collector.evaluator.RemonLogger;
 import org.apache.mahout.math.Vector;
 import org.apache.reef.io.network.util.Pair;
@@ -130,7 +131,9 @@ public final class KMeansComputeTask implements Task {
 
     // 1. Start iteration
     boolean terminate = false;
+    long iterCount = 0;
     while (!terminate) {
+      logger.event("iter"+iterCount, EventType.START);
       switch (ctrlMsgBroadcast.receive()) {
         case TERMINATE:
           terminate = true;
@@ -148,6 +151,7 @@ public final class KMeansComputeTask implements Task {
         default:
           break;
       }
+      logger.event("iter"+(iterCount++), EventType.END);
     }
 
     return null;
