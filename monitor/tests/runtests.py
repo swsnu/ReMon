@@ -18,6 +18,12 @@ class MainHandlerTestCase(AsyncHTTPTestCase):
         response = self.fetch(r'/')
         self.assertEqual(response.code, 200)
 
+    def test_analytics_page(self):
+        response = self.fetch(r'/analytics')
+        self.assertEqual(response.code, 200)
+        response = self.fetch(r'/analytics?ip=127.0.0.1')
+        self.assertEqual(response.code, 200)
+
     def test_not_found(self):
         response = self.fetch(r'/i-am-lost')
         self.assertEqual(response.code, 404)
