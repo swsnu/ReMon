@@ -27,13 +27,11 @@ RemonDashboard.prototype.addMetric = function(metric) {
 
     var graph = this.graphs[name];
     graph.addMetric(metric);
-    graph.update();
 }
 
 
 RemonDashboard.prototype.addEvent = function(ev) {
     this.timeline.addEvent(ev);
-    this.timeline.update();
 }
 
 
@@ -98,6 +96,10 @@ RemonDashboard.prototype.callback = function(data) {
         for (var i in data.events) {
             this.addEvent(data.events[i]);
         }
+        for (var j in this.graphs) {
+            this.graphs[j].update();
+        }
+        this.timeline.update();
     }
     else {
         console.error('Undefined opcode:', data.op);
