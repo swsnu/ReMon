@@ -18,6 +18,12 @@ class MainHandlerTestCase(AsyncHTTPTestCase):
         response = self.fetch(r'/')
         self.assertEqual(response.code, 200)
 
+    def test_analytics_page(self):
+        response = self.fetch(r'/analytics')
+        self.assertEqual(response.code, 200)
+        response = self.fetch(r'/analytics?ip=127.0.0.1')
+        self.assertEqual(response.code, 200)
+
     def test_not_found(self):
         response = self.fetch(r'/i-am-lost')
         self.assertEqual(response.code, 404)
@@ -76,7 +82,7 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
                 'source_id': 'TEST_SOURCE_ID',
                 'tag': 'TEST_TAG',
                 'time': 1234567890,
-                'type': 'START'
+                'type': 'START',
             }],
         }
         ws.write_message(json_encode(payload))
@@ -106,7 +112,7 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
                 'source_id': 'TEST_SOURCE_ID',
                 'tag': 'TEST_TAG',
                 'time': 1234567890,
-                'type': 'START'
+                'type': 'START',
             }],
         }
         ws.write_message(json_encode(payload))
@@ -143,6 +149,12 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
         ws = yield self.ws_connect()
         ws.write_message(json_encode({
             'op': 'clear',
+            'auth_key': '__REMON_ADMIN_PASSWORD__',
+        }))
+        response = yield self.wait_response(ws)
+        ws.write_message(json_encode({
+            'op': 'subscribe',
+            'app_id': 'TEST_APP_ID',
         }))
         response = yield self.wait_response(ws)
 
@@ -171,6 +183,7 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
         }
         for _ in xrange(n_times):
             ws.write_message(json_encode(payload))
+            response = yield self.wait_response(ws)
 
         ws.write_message(json_encode({
             'op': 'history',
@@ -193,10 +206,15 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
         ws = yield self.ws_connect()
         payload = {
             'op': 'clear',
+            'auth_key': '__REMON_ADMIN_PASSWORD__',
         }
         ws.write_message(json_encode(payload))
         response = yield self.wait_response(ws)
-        self.assertDictEqual(payload, response)
+        expected_response = {
+            'op': 'clear',
+            'error': False,
+        }
+        self.assertDictEqual(expected_response, response)
         ws.close()
 
     @gen_test

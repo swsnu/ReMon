@@ -14,6 +14,7 @@ from tornado.options import define, options
 
 define('port', default=8000, help='run on the given port', type=int)
 define('mongo_uri', default='mongodb://localhost:27017/remon', type=str)
+define('auth_key', default='__REMON_ADMIN_PASSWORD__', type=str)
 
 
 class Application(tornado.web.Application):
@@ -27,6 +28,7 @@ class Application(tornado.web.Application):
             'table_messages_prefix': 'table_messages_',
             'table_events_prefix': 'table_events_',
             'table_analytics': 'analytics',
+            'auth_key': options.auth_key,
         }
         handlers = [
             (r'/', MainHandler),
@@ -215,13 +217,23 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             self.write_message(json_encode(response))
 
         elif op == 'clear':
-            table_names = yield self.db.collection_names()
-            for name in table_names:
-                if name.startswith(self.settings['table_metrics_prefix']) or\
-                   name.startswith(self.settings['table_messages_prefix']) or\
-                   name.startswith(self.settings['table_events_prefix']):
-                    yield self.db[name].remove()
-            self.write_message(message)
+            if data.get('auth_key') == self.settings['auth_key']:
+                table_names = yield self.db.collection_names()
+                for name in table_names:
+                    if name.startswith(self.settings['table_metrics_prefix']) or\
+                       name.startswith(self.settings['table_messages_prefix']) or\
+                       name.startswith(self.settings['table_events_prefix']):
+                        yield self.db[name].remove()
+                self.write_message(json_encode({
+                    'op': 'clear',
+                    'error': False,
+                }))
+            else:
+                self.write_message(json_encode({
+                    'op': 'clear',
+                    'error': True,
+                    'error_reason': 'Auth failed',
+                }))
 
         else:
             self.write_message(json_encode({
