@@ -1,5 +1,6 @@
 package edu.snu.cms.remon.collector.evaluator;
 
+import edu.snu.cms.remon.collector.EventType;
 import org.apache.reef.task.events.TaskStart;
 import org.apache.reef.wake.EventHandler;
 
@@ -19,7 +20,6 @@ public class RemonStartTaskHandler implements EventHandler<TaskStart> {
   @Override
   public void onNext(TaskStart task) {
     final long timestamp = System.currentTimeMillis();
-    // TODO This is just log "Start" message. Revisit when new API is implemented for Task Start/Complete
-    logger.value("Start", timestamp);
+    logger.event("Task", EventType.START);
   }
 }

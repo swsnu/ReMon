@@ -1,5 +1,6 @@
 package edu.snu.cms.remon.collector.evaluator;
 
+import edu.snu.cms.remon.collector.EventType;
 import org.apache.reef.task.HeartBeatTriggerManager;
 import org.apache.reef.task.events.TaskStop;
 import org.apache.reef.wake.EventHandler;
@@ -23,8 +24,7 @@ public class RemonStopTaskHandler implements EventHandler<TaskStop> {
   @Override
   public void onNext(TaskStop task) {
     final long timestamp = System.currentTimeMillis();
-    // TODO This is just log "Stop" message. Revisit when new API is implemented for Task Start/Complete
-    logger.value("Stop " + task.getId(), timestamp);
+    logger.event("Task", EventType.END);
     heartBeatTriggerManager.triggerHeartBeat();
   }
 }
