@@ -226,7 +226,7 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
                     if name.startswith(self.settings['table_metrics_prefix']) or\
                        name.startswith(self.settings['table_messages_prefix']) or\
                        name.startswith(self.settings['table_events_prefix']):
-                        yield self.db[name].remove()
+                        yield self.db.drop_collection(name)
                 self.write_message(json_encode({
                     'op': 'clear',
                     'error': False,
