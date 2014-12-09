@@ -3,6 +3,7 @@
 function RemonTimeline() {
     this.data = [];
     this.savedStart = {};
+    this.colors = d3.scale.category10();
 }
 
 
@@ -20,7 +21,8 @@ RemonTimeline.prototype.update = function() {
                   .stack()
                   .margin({ left: 150, right: 0, top: 0, bottom: 0 })
                   .hover(function (d, i, datum) {
-                      $('#timeline-text').text(datum.label);
+                      var name = datum.label + '#' + d.tag;
+                      $('#timeline-text').text(name);
                   })
 
     if (this.data.length > 0) {
@@ -37,14 +39,14 @@ RemonTimeline.prototype.update = function() {
 RemonTimeline.prototype.addEvent = function(ev) {
     switch (ev.type) {
         case 'START':
-            this.savedStart[ev.tag] = ev.time;
+            this.savedStart[ev.source_id] = ev.time;
             break;
 
         case 'END':
-            if (this.savedStart[ev.tag] !== undefined) {
-                var startTime = this.savedStart[ev.tag];
-                this.addEventLine(ev.tag, startTime, ev.time);
-                delete this.savedStart[ev.tag];
+            if (this.savedStart[ev.source_id] !== undefined) {
+                var startTime = this.savedStart[ev.source_id];
+                this.addEventLine(ev.source_id, ev.tag, startTime, ev.time);
+                delete this.savedStart[ev.source_id];
             }
             break;
 
@@ -54,20 +56,27 @@ RemonTimeline.prototype.addEvent = function(ev) {
 }
 
 
-RemonTimeline.prototype.addEventLine = function(tag, startTime, endTime) {
-    var line = {'starting_time': startTime, 'ending_time': endTime};
+RemonTimeline.prototype.addEventLine = function(sourceId, tag, startTime, endTime) {
+    var line = {
+        'tag': tag,
+        'starting_time': startTime,
+        'ending_time': endTime,
+    };
 
     var found = false;
     for (var i in this.data) {
-        if (this.data[i].label === tag) {
+        if (this.data[i].label === sourceId) {
+            var idx = this.data[i].times.length;
+            line.color = this.colors(idx + 1);
             this.data[i].times.push(line);
             found = true;
         }
     }
 
     if (!found) {
+        line.color = this.colors(0);
         this.data.push({
-            'label': tag,
+            'label': sourceId,
             'times': [line],
         });
     }
