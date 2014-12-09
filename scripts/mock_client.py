@@ -30,6 +30,17 @@ if __name__ == '__main__':
                 'source_id': 'TEST_SOURCE_ID',
                 'time': int(time.time()) + t,
             }],
+            'events': [{
+                'type': 'START',
+                'time': int(time.time()) + 2 * t,
+                'tag': 'TEST_TAG_%d' % t,
+                'source_id': 'TEST_SOURCE_ID',
+            }, {
+                'type': 'END',
+                'time': int(time.time()) + 2 * t + 1,
+                'tag': 'TEST_TAG_%d' % t,
+                'source_id': 'TEST_SOURCE_ID',
+            }],
         }
         ws.send(json_encode(message))
     ws.close()
