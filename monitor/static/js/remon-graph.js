@@ -120,6 +120,10 @@ function RemonHistogramGraph(params) {
 }
 
 RemonHistogramGraph.prototype.draw = function() {
+    var source = $('#template-histogram-graph').html();
+    var template = Handlebars.compile(source);
+    $('#metric-box').append(template(this));
+
     var element = document.getElementById(this.chartId);
 
     if (element != null && this.graph == null) {
