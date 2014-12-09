@@ -104,6 +104,11 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             prefix = self.settings['table_messages_prefix']
             yield self.db[prefix + app_id].insert(messages)
 
+            messages = data['events']
+            assert(isinstance(messages, list))
+            prefix = self.settings['table_events_prefix']
+            yield self.db[prefix + app_id].insert(events)
+
         elif op == 'list':
             table_names = yield self.db.collection_names()
             table_names.sort()
