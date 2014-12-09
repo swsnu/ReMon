@@ -72,11 +72,13 @@ public class RemonLogger implements TaskMessageSource {
    */
   @Override
   public Optional<TaskMessage> getMessage() {
+
     // TODO : we should retrieve APPID automatic-manner. currently "K-means" is hardcoded.
     final Data data = new Data("insert", "K-means", metrics, messages, events);
     final TaskMessage msg = TaskMessage.from(MSG_SOURCE, new Codec().encode(data));
     metrics.clear();
     messages.clear();
+    events.clear();
     return Optional.of(msg);
   }
 }
