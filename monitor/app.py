@@ -133,7 +133,7 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             for v in data:
                 self._assert_data(v)
         elif isinstance(data, basestring):
-            assert(bool(re.match('^[A-Za-z0-9_-]*$', data)))
+            assert(bool(re.match('^[A-Za-z0-9_\-\ ]*$', data)))
         else:
             pass
 
