@@ -2,6 +2,7 @@
 import motor
 import os.path
 import pytz
+import re
 from datetime import datetime, timedelta
 
 import tornado.gen
@@ -124,10 +125,23 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
         self.mq.unsubscribe(self)
 
+    def _assert_data(self, data):
+        if isinstance(data, dict):
+            for (k, v) in data.items():
+                self._assert_data(v)
+        elif isinstance(data, list):
+            for v in data:
+                self._assert_data(v)
+        elif isinstance(data, basestring):
+            assert(bool(re.match('^[A-Za-z0-9_-]*$', data)))
+        else:
+            pass
+
     @tornado.gen.coroutine
     def on_message(self, message):
         print message
         data = json_decode(message)
+        self._assert_data(data)
         op = data.get('op')
         app_id = data.get('app_id')
 
