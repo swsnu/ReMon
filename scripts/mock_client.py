@@ -8,7 +8,10 @@ from websocket import create_connection
 if __name__ == '__main__':
     address = 'ws://localhost:8000/websocket'
     ws = create_connection(address)
-    ws.send(json_encode({'op': 'clear'}))
+    ws.send(json_encode({
+        'op': 'clear',
+        'auth_key': '__REMON_ADMIN_PASSWORD__',
+    }))
     time.sleep(1.)
     n_times = 10
     for t in xrange(n_times):

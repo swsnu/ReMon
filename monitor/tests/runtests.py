@@ -143,6 +143,7 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
         ws = yield self.ws_connect()
         ws.write_message(json_encode({
             'op': 'clear',
+            'auth_key': '__REMON_ADMIN_PASSWORD__',
         }))
         response = yield self.wait_response(ws)
 
@@ -193,10 +194,15 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
         ws = yield self.ws_connect()
         payload = {
             'op': 'clear',
+            'auth_key': '__REMON_ADMIN_PASSWORD__',
         }
         ws.write_message(json_encode(payload))
         response = yield self.wait_response(ws)
-        self.assertDictEqual(payload, response)
+        expected_response = {
+            'op': 'clear',
+            'error': False,
+        }
+        self.assertDictEqual(expected_response, response)
         ws.close()
 
     @gen_test
