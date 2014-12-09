@@ -29,6 +29,7 @@ import edu.snu.cms.reef.ml.kmeans.parameters.ControlMessage;
 import edu.snu.cms.reef.ml.kmeans.data.VectorDistanceMeasure;
 import edu.snu.cms.reef.ml.kmeans.data.VectorSum;
 import edu.snu.cms.reef.ml.kmeans.utils.DataParser;
+import org.apache.reef.task.HeartBeatTriggerManager;
 import org.apache.reef.task.Task;
 
 import javax.inject.Inject;
@@ -90,6 +91,8 @@ public final class KMeansComputeTask implements Task {
    */
   private List<Vector> initialCentroids = new ArrayList<>();
 
+  private final HeartBeatTriggerManager heartBeatTriggerManager;
+
   private RemonLogger logger;
   /**
    * This class is instantiated by TANG
@@ -104,9 +107,11 @@ public final class KMeansComputeTask implements Task {
   KMeansComputeTask(final DataParser<Pair<List<Vector>, List<Vector>>> dataParser,
                     final GroupCommClient groupCommClient,
                     final VectorDistanceMeasure distanceMeasure,
+                    final HeartBeatTriggerManager heartBeatTriggerManager,
                     final RemonLogger logger) {
     super();
     this.dataParser = dataParser;
+    this.heartBeatTriggerManager = heartBeatTriggerManager;
     this.logger = logger;
 
     CommunicationGroupClient commGroupClient = groupCommClient.getCommunicationGroup(CommunicationGroup.class);
@@ -154,6 +159,8 @@ public final class KMeansComputeTask implements Task {
       logger.event("iter"+(iterCount++), EventType.END);
     }
 
+    logger.event("Task", EventType.END);
+    heartBeatTriggerManager.triggerHeartBeat();
     return null;
   }
 
@@ -170,7 +177,7 @@ public final class KMeansComputeTask implements Task {
 
       for (int i = 0; i < clusters.size(); i++) {
         final double distance = distanceMeasure.distance(clusters.get(i).vector, vector);
-        logger.value("distance", distance);
+
         if (nearestClusterDist > distance) {
           nearestClusterDist = distance;
           nearestClusterId = i;

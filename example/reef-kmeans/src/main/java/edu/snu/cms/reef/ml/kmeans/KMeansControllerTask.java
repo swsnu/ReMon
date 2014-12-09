@@ -28,6 +28,7 @@ import edu.snu.cms.reef.ml.kmeans.parameters.MaxIterations;
 import edu.snu.cms.reef.ml.kmeans.converge.KMeansConvergenceCondition;
 import edu.snu.cms.reef.ml.kmeans.data.VectorSum;
 import org.apache.reef.tang.annotations.Parameter;
+import org.apache.reef.task.HeartBeatTriggerManager;
 import org.apache.reef.task.Task;
 
 import javax.inject.Inject;
@@ -97,6 +98,9 @@ public final class KMeansControllerTask implements Task {
    * Maximum number of iterations allowed before job stops
    */
   private final int maxIterations;
+
+  private final HeartBeatTriggerManager heartBeatTriggerManager;
+
   private final RemonLogger logger;
 
   /**
@@ -112,6 +116,7 @@ public final class KMeansControllerTask implements Task {
   public KMeansControllerTask(final GroupCommClient groupCommClient,
                               final KMeansConvergenceCondition convergenceCondition,
                               @Parameter(MaxIterations.class) final int maxIter,
+                              final HeartBeatTriggerManager heartBeatTriggerManager,
                               final RemonLogger logger) {
     super();
 
@@ -123,6 +128,7 @@ public final class KMeansControllerTask implements Task {
 
     this.convergenceCondition = convergenceCondition;
     this.maxIterations = maxIter;
+    this.heartBeatTriggerManager = heartBeatTriggerManager;
     this.logger = logger;
   }
 
@@ -151,11 +157,12 @@ public final class KMeansControllerTask implements Task {
       logger.event("iter"+iteration, EventType.START);
       result = iterateKMeansClustering(iteration);
       logger.event("iter"+iteration, EventType.END);
-      if (result == false) break;
+      //if (result == false) break;
     }
 
     ctrlMsgBroadcast.send(ControlMessage.TERMINATE);
-
+    logger.event("Task", EventType.END);
+    heartBeatTriggerManager.triggerHeartBeat();
     return null;
   }
 
