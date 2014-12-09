@@ -24,7 +24,7 @@ public class RemonStopTaskHandler implements EventHandler<TaskStop> {
   @Override
   public void onNext(TaskStop task) {
     final long timestamp = System.currentTimeMillis();
-    logger.event("Task", EventType.END);
-    heartBeatTriggerManager.triggerHeartBeat();
+    /*logger.event("Task", EventType.END);
+    heartBeatTriggerManager.triggerHeartBeat();*/
   }
 }
