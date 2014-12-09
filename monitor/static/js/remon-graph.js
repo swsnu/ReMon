@@ -80,19 +80,62 @@ RemonLifecycleGraph.prototype.constructor = RemonLifecycleGraph;
 
 function RemonLifecycleGraph(params) {
     params = params || {};
+    this.startTimes = params.startTimes || {};
     RemonGraph.call(this, params);
 }
+
 
 RemonLifecycleGraph.prototype.draw = function() {
     var source = $('#template-lifecycle-graph').html();
     var template = Handlebars.compile(source);
     $('#metric-box').append(template(this));
+}
 
+
+RemonLifecycleGraph.prototype.update = function() {
     var element = document.getElementById(this.chartId);
+    var valueId = this.valueId;
+    var width = element.offsetWidth;
 
-    this.graph = d3.timeline();
+    this.graph = d3.timeline()
+                   .width(width)
+                   .stack()
+                   .hover(function (d, i, datum) {
+                       $('#' + valueId).text(datum.label);
+                   })
 
-    var testData = [
+    $('#' + this.chartId).empty();
+    var svg = d3.select('#' + this.chartId)
+                .append('svg')
+                .attr('width', width)
+                .datum(this.data)
+                .call(this.graph);
+}
+
+RemonLifecycleGraph.prototype.addValue = function(time, tag, type) {
+    switch (type) {
+        case 'START':
+            this.startTimes[tag] = time;
+            break;
+
+        case 'END':
+            if (this.startTimes[tag] !== undefined) {
+                this.data.push({
+                    'label': tag,
+                    'times': [{
+                        'starting_time': this.startTimes[tag],
+                        'ending_time': time,
+                    }],
+                });
+            }
+            break;
+
+        default:
+            console.log('Undefined event type', type);
+    }
+    /*
+    console.log('Lifecycle.addValue', time, tag, type);
+    this.data = [
         {label: "person a", times: [
               {"starting_time": 1355752800000, "ending_time": 1355759900000},
               {"starting_time": 1355767900000, "ending_time": 1355774400000}]},
@@ -101,11 +144,5 @@ RemonLifecycleGraph.prototype.draw = function() {
         {label: "person c", times: [
               {"starting_time": 1355761910000, "ending_time": 1355763910000}]},
     ];
-
-    var svg = d3.select('#' + this.chartId).append('svg').attr('width', 500).datum(testData).call(chart);
-}
-
-RemonLifecycleGraph.prototype.addValue = function(time, tag, type) {
-    /* FIXME */
-    console.log('Lifecycle.addValue', time, tag, type);
+    */
 }
