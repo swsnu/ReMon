@@ -144,9 +144,14 @@ public final class KMeansControllerTask implements Task {
       centroids.add(new Centroid(clusterID++, vector));
     }
 
+    boolean result;
     for (int iteration = 0; iteration < maxIterations; iteration++) {
+
       logger.value("iteration", iteration);
-      if (iterateKMeansClustering(iteration) == false) break;
+      logger.event("iter"+iteration, EventType.START);
+      result = iterateKMeansClustering(iteration);
+      logger.event("iter"+iteration, EventType.END);
+      if (result == false) break;
     }
 
     ctrlMsgBroadcast.send(ControlMessage.TERMINATE);
@@ -157,9 +162,8 @@ public final class KMeansControllerTask implements Task {
   private final boolean iterateKMeansClustering(final int iteration) throws Exception {
 
     Map<Integer, VectorSum> map;
-    long iterCount = 0;
     do {
-      logger.event("iter"+iterCount, EventType.START);
+
 
       topologyChanged();
 
@@ -171,7 +175,6 @@ public final class KMeansControllerTask implements Task {
       // 4. Receive vector sums and compute new cluster centroids
       map = newCentroidReduce.reduce();
 
-      logger.event("iter"+(iterCount++), EventType.END);
     } while (map == null);
 
     for (final Integer id : map.keySet()) {
