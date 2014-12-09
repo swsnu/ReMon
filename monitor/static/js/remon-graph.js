@@ -5,6 +5,8 @@ function RemonGraph(params) {
     this.idx = params.idx || 0;
     this.chartId = 'chart' + this.idx;
     this.valueId = 'value' + this.idx;
+    this.sourceId = params.sourceId || '';
+    this.tag = params.tag || '';
     this.name = params.name || '';
     this.data = params.data || [];
     this.graph = params.graph || null;

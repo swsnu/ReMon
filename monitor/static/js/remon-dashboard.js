@@ -10,12 +10,17 @@ function RemonDashboard() {
 
 
 RemonDashboard.prototype.addMetric = function(metric) {
-    var name = metric.tag;
+    var name = metric.source_id + '#' + metric.tag;
 
     /* Draw new graph if not exist */
     if (name in this.graphs === false) {
         var idx = Object.keys(this.graphs).length;
-        var graph = new RemonGraph({ idx: idx, name: name });
+        var graph = new RemonGraph({
+            idx: idx,
+            sourceId: metric.source_id,
+            tag: metric.tag,
+            name: name,
+        });
         this.graphs[name] = graph;
         graph.draw();
     }
