@@ -126,6 +126,7 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
 
     @tornado.gen.coroutine
     def on_message(self, message):
+        print message
         data = json_decode(message)
         op = data.get('op')
         app_id = data.get('app_id')
