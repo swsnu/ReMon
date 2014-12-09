@@ -33,6 +33,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -156,8 +157,9 @@ public final class KMeansControllerTask implements Task {
   private final boolean iterateKMeansClustering(final int iteration) throws Exception {
 
     Map<Integer, VectorSum> map;
-
+    final AtomicLong iterCount = new AtomicLong(0);
     do {
+
       topologyChanged();
 
       ctrlMsgBroadcast.send(ControlMessage.COMPUTE);
