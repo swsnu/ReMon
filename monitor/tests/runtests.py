@@ -72,6 +72,12 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
                 'time': 1234567890,
                 'message': 'TEST_MESSAGE',
             }],
+            'events': [{
+                'source_id': 'TEST_SOURCE_ID',
+                'tag': 'TEST_TAG',
+                'time': 1234567890,
+                'type': "START"
+            }],
         }
         ws.write_message(json_encode(payload))
         response = yield self.wait_response(ws)
