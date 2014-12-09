@@ -10,6 +10,7 @@
     <script type="text/javascript" src="{{ static_url('js/jquery.min.js') }}"></script>
     <script type="text/javascript" src="{{ static_url('js/bootstrap.min.js') }}"></script>
     <script type="text/javascript" src="{{ static_url('js/d3.v3.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/d3-timeline.js') }}"></script>
     <script type="text/javascript" src="{{ static_url('js/rickshaw.min.js') }}"></script>
     <script type="text/javascript" src="{{ static_url('js/handlebars.js') }}"></script>
     <script type="text/javascript" src="{{ static_url('js/remon-dashboard.js') }}"></script>
@@ -70,7 +71,7 @@
 </ul>
 </script>
 
-<script id="template-graph" type="text/x-handlebars-template">
+<script id="template-timeseries-graph" type="text/x-handlebars-template">
 <div class="col-sm-6 col-md-4">
     <div class="panel panel-default">
         <div class="panel-heading">{{!name}}</div>
@@ -79,6 +80,20 @@
         </div>
         <div class="panel-footer">
             <span id="{{!valueId}}" class="value">NaN</span>
+        </div>
+    </div>
+</div>
+</script>
+
+<script id="template-lifecycle-graph" type="text/x-handlebars-template">
+<div class="col-md-12">
+    <div class="panel panel-default">
+        <div class="panel-heading">Lifecycle</div>
+        <div class="panel-body">
+            <div id="{{!chartId}}" class="chart"></div>
+        </div>
+        <div class="panel-footer">
+            <span id="{{!valueId}}" class="value"></span>
         </div>
     </div>
 </div>

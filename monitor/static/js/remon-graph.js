@@ -80,6 +80,8 @@ RemonLifecycleGraph.prototype.constructor = RemonLifecycleGraph;
 
 function RemonLifecycleGraph(params) {
     params = params || {};
+    this.waitingStartEvents = {};
+    this.waitingEndEvents = {};
     RemonGraph.call(this, params);
 }
 
@@ -87,27 +89,90 @@ RemonLifecycleGraph.prototype.draw = function() {
     var source = $('#template-lifecycle-graph').html();
     var template = Handlebars.compile(source);
     $('#metric-box').append(template(this));
+}
 
+RemonLifecycleGraph.prototype.update = function() {
     var element = document.getElementById(this.chartId);
+    var valueId = this.valueId;
+    var width = element.offsetWidth;
 
-    this.graph = d3.timeline();
+    this.graph = d3.timeline()
+                   .width(width)
+                   .stack()
+                   .margin({left:150, right:0, top:0, bottom:0})
+                   .hover(function (d, i, datum) {
+                       $('#' + valueId).text(datum.label);
+                   })
 
-    var testData = [
-        {label: "person a", times: [
-              {"starting_time": 1355752800000, "ending_time": 1355759900000},
-              {"starting_time": 1355767900000, "ending_time": 1355774400000}]},
-        {label: "person b", times: [
-              {"starting_time": 1355759910000, "ending_time": 1355761900000}]},
-        {label: "person c", times: [
-              {"starting_time": 1355761910000, "ending_time": 1355763910000}]},
-    ];
-
-    var svg = d3.select('#' + this.chartId).append('svg').attr('width', 500).datum(testData).call(chart);
+    if (this.data.length > 0) {
+        $('#' + this.chartId).empty();
+        var svg = d3.select('#' + this.chartId)
+                    .append('svg')
+                    .attr('width', width)
+                    .datum(this.data)
+                    .call(this.graph);
+    }
 }
 
 RemonLifecycleGraph.prototype.addValue = function(time, tag, type) {
-    /* FIXME */
-    console.log('Lifecycle.addValue', time, tag, type);
+    switch (type) {
+        case 'START':
+            if (this.waitingEndEvents[tag] !== undefined) {
+                var pairedTime = this.waitingEndEvents[tag].shift();
+                if (this.waitingEndEvents[tag].length == 0) {
+                    delete this.waitingEndEvents[tag];
+                }
+                this.addTimeline(tag, time, pairedTime);
+            } else {
+                if (tag in this.waitingStartEvents === false) {
+                    this.waitingStartEvents[tag] = [];
+                }
+                this.waitingStartEvents[tag].push(time);
+            }
+            break;
+
+        case 'END':
+            if (this.waitingStartEvents[tag] !== undefined) {
+                var pairedTime = this.waitingStartEvents[tag].shift();
+                if (this.waitingStartEvents[tag].length == 0) {
+                    delete this.waitingStartEvents[tag];
+                }
+                this.addTimeline(tag, pairedTime, time);
+            } else {
+                if (tag in this.waitingEndEvents === false) {
+                    this.waitingEndEvents[tag] = [];
+                }
+                this.waitingEndEvents[tag].push(time);
+            }
+            break;
+
+        default:
+            console.log('Undefined event type', type);
+    }
+}
+
+RemonLifecycleGraph.prototype.addTimeline = function(tag, startTime, endTime) {
+    var found = false;
+
+    for (var i in this.data) {
+        if (this.data[i].label === tag) {
+            this.data[i].times.push({
+                'starting_time': startTime,
+                'ending_time': endTime,
+            });
+            found = true;
+        }
+    }
+
+    if (!found) {
+        this.data.push({
+            'label': tag,
+            'times': [{
+                'starting_time': startTime,
+                'ending_time': endTime,
+            }],
+        });
+    }
 }
 
 
