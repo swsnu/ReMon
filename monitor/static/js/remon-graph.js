@@ -103,12 +103,14 @@ RemonLifecycleGraph.prototype.update = function() {
                        $('#' + valueId).text(datum.label);
                    })
 
-    $('#' + this.chartId).empty();
-    var svg = d3.select('#' + this.chartId)
-                .append('svg')
-                .attr('width', width)
-                .datum(this.data)
-                .call(this.graph);
+    if (this.data.length > 0) {
+        $('#' + this.chartId).empty();
+        var svg = d3.select('#' + this.chartId)
+                    .append('svg')
+                    .attr('width', width)
+                    .datum(this.data)
+                    .call(this.graph);
+    }
 }
 
 RemonLifecycleGraph.prototype.addValue = function(time, tag, type) {
