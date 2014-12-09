@@ -159,7 +159,7 @@ public final class KMeansControllerTask implements Task {
     Map<Integer, VectorSum> map;
     long iterCount = 0;
     do {
-      logger.event("iter"+iterCount, EventType.END);
+      logger.event("iter"+iterCount, EventType.START);
 
       topologyChanged();
 
