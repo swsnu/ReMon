@@ -30,7 +30,7 @@ body.enlarged {
     height: 200px;
 }
 
-#footer #message-logs li {
+#footer #message-box li {
     margin-top: 10px;
     font-family: monospace;
 }

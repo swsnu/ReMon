@@ -4,7 +4,7 @@ var dashboard;
 $(document).ready(function() {
 
     if (!window['WebSocket']) {
-        console.log('Websocket not supported.');
+        console.error('Websocket not supported.');
         return;
     }
 

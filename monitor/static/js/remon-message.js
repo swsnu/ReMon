@@ -16,8 +16,9 @@ Object.defineProperty(Date.prototype, 'toPrettyString', {
 
 function RemonMessage(params) {
     params = params || {};
-    this.level = params.level || "";
-    this.message = params.message || "";
+    this.sourceId = params.source_id || '';
+    this.level = params.level || '';
+    this.message = params.message || '';
     this.time = params.time || 0;
     this.levelType = this.getLevelType();
     this.prettyTime = (new Date(this.time * 1000)).toPrettyString();
@@ -26,28 +27,29 @@ function RemonMessage(params) {
 
 RemonMessage.prototype.getLevelType = function() {
     switch (this.level) {
-        case "FINEST":
-        case "FINER":
-        case "FINE":
-            return "success";
+        case 'FINEST':
+        case 'FINER':
+        case 'FINE':
+            return 'success';
 
-        case "CONFIG":
-        case "INFO":
-            return "info";
+        case 'CONFIG':
+        case 'INFO':
+            return 'info';
  
-        case "WARNING":
-            return "warning";
+        case 'WARNING':
+            return 'warning';
 
-        case "SEVERE":
-            return "error";
+        case 'SEVERE':
+            return 'error';
 
         default:
-            return "default";
+            return 'default';
     }
 }
+
 
 RemonMessage.prototype.draw = function() {
     var source = $('#template-message').html();
     var template = Handlebars.compile(source);
-    $('#message-logs').append(template(this));
+    $('#message-box').append(template(this));
 }
