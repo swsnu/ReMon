@@ -57,12 +57,13 @@ class AnalyticsHandler(tornado.web.RequestHandler):
 
         ip = self.get_argument('ip', None)
         query = {'ip': ip} if ip else {}
-        cursor = db[table_name].find(query).sort('_id', -1)
+        cursor = db[table_name].find(query)
 
         users = set()
         occurrence = {'total': [], 'day': [], 'hour': []}
-        pivot_day = pytz.utc.localize(datetime.now() - timedelta(days=1))
-        pivot_hour = pytz.utc.localize(datetime.now() - timedelta(hours=1))
+        timezone = pytz.timezone('Asia/Seoul')
+        pivot_day = timezone.localize(datetime.now() - timedelta(days=1))
+        pivot_hour = timezone.localize(datetime.now() - timedelta(hours=1))
 
         while (yield cursor.fetch_next):
             item = cursor.next_object()
