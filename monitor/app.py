@@ -143,17 +143,20 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
             metrics = data['metrics']
             assert(isinstance(metrics, list))
             prefix = self.settings['table_metrics_prefix']
-            yield self.db[prefix + app_id].insert(metrics)
+            if len(metrics) > 0:
+                yield self.db[prefix + app_id].insert(metrics)
 
             messages = data['messages']
             assert(isinstance(messages, list))
             prefix = self.settings['table_messages_prefix']
-            yield self.db[prefix + app_id].insert(messages)
+            if len(messages) > 0:
+                yield self.db[prefix + app_id].insert(messages)
 
             events = data['events']
             assert(isinstance(events, list))
             prefix = self.settings['table_events_prefix']
-            yield self.db[prefix + app_id].insert(events)
+            if len(events) > 0:
+                yield self.db[prefix + app_id].insert(events)
 
         elif op == 'list':
             table_names = yield self.db.collection_names()
