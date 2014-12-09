@@ -57,12 +57,13 @@ class AnalyticsHandler(tornado.web.RequestHandler):
 
         ip = self.get_argument('ip', None)
         query = {'ip': ip} if ip else {}
-        cursor = db[table_name].find(query).sort('_id', -1)
+        cursor = db[table_name].find(query)
 
         users = set()
         occurrence = {'total': [], 'day': [], 'hour': []}
-        pivot_day = pytz.utc.localize(datetime.now() - timedelta(days=1))
-        pivot_hour = pytz.utc.localize(datetime.now() - timedelta(hours=1))
+        timezone = pytz.timezone('Asia/Seoul')
+        pivot_day = timezone.localize(datetime.now() - timedelta(days=1))
+        pivot_hour = timezone.localize(datetime.now() - timedelta(hours=1))
 
         while (yield cursor.fetch_next):
             item = cursor.next_object()
@@ -175,7 +176,6 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
 
         elif op == 'list':
             table_names = yield self.db.collection_names()
-            table_names.sort()
 
             candidates = set()
             for name in table_names:
@@ -192,6 +192,7 @@ class WebsocketHandler(tornado.websocket.WebSocketHandler):
                     candidates.add(name[len(prefix):])
 
             app_list = [{'app_id': app_id} for app_id in candidates]
+            app_list.sort()
 
             self.write_message(json_encode({
                 'op': 'list',
