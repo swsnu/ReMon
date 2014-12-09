@@ -102,6 +102,12 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
                 'time': 1234567890,
                 'message': 'TEST_MESSAGE',
             }],
+            'events': [{
+                'source_id': 'TEST_SOURCE_ID',
+                'tag': 'TEST_TAG',
+                'time': 1234567890,
+                'type': "START"
+            }],
         }
         ws.write_message(json_encode(payload))
         with self.assertRaises(gen.TimeoutError) as context:
@@ -155,6 +161,12 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
                 'level': 'INFO',
                 'time': 1234567890,
                 'message': 'TEST_MESSAGE',
+            }],
+            'events': [{
+                'source_id': 'TEST_SOURCE_ID',
+                'tag': 'TEST_TAG',
+                'time': 1234567890,
+                'type': "START"
             }],
         }
         for _ in xrange(n_times):
