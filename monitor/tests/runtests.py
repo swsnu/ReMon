@@ -82,7 +82,7 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
                 'source_id': 'TEST_SOURCE_ID',
                 'tag': 'TEST_TAG',
                 'time': 1234567890,
-                'type': 'START'
+                'type': 'START',
             }],
         }
         ws.write_message(json_encode(payload))
@@ -112,7 +112,7 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
                 'source_id': 'TEST_SOURCE_ID',
                 'tag': 'TEST_TAG',
                 'time': 1234567890,
-                'type': 'START'
+                'type': 'START',
             }],
         }
         ws.write_message(json_encode(payload))
@@ -152,6 +152,11 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
             'auth_key': '__REMON_ADMIN_PASSWORD__',
         }))
         response = yield self.wait_response(ws)
+        ws.write_message(json_encode({
+            'op': 'subscribe',
+            'app_id': 'TEST_APP_ID',
+        }))
+        response = yield self.wait_response(ws)
 
         n_times = 5
         payload = {
@@ -178,6 +183,7 @@ class WebsocketHandlerTestCase(AsyncHTTPTestCase):
         }
         for _ in xrange(n_times):
             ws.write_message(json_encode(payload))
+            response = yield self.wait_response(ws)
 
         ws.write_message(json_encode({
             'op': 'history',
