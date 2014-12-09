@@ -8,6 +8,7 @@ $(document).ready(function() {
         return;
     }
 
+    $('#loader').show();
     $('#footer').click(function() {
         $(this).toggleClass('enlarged');
     });

@@ -32,7 +32,8 @@ RemonDashboard.prototype.showAppList = function() {
     var source = $('#template-app-list').html();
     var template = Handlebars.compile(source);
     var context = { apps: this.appList };
-    $('#metric-box').html(template(context))
+    $('#metric-box').html(template(context));
+    $('#message-logs').empty();
     $('.navbar-brand').text('ReMon');
 }
 
