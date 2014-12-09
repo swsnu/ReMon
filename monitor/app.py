@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import motor
 import os.path
+import pytz
+from datetime import datetime, timedelta
+
 import tornado.gen
 import tornado.httpserver
 import tornado.ioloop
@@ -16,14 +19,17 @@ define('mongo_uri', default='mongodb://localhost:27017/remon', type=str)
 class Application(tornado.web.Application):
 
     def __init__(self):
+        base_dir = os.path.dirname(__file__)
         settings = {
-            'static_path': os.path.join(os.path.dirname(__file__), 'static'),
+            'static_path': os.path.join(base_dir, 'static'),
+            'template_path': os.path.join(base_dir, 'templates'),
             'table_metrics_prefix': 'table_metrics_',
             'table_messages_prefix': 'table_messages_',
             'table_analytics': 'analytics',
         }
         handlers = [
             (r'/', MainHandler),
+            (r'/analytics', AnalyticsHandler),
             (r'/websocket', WebsocketHandler),
         ]
         db_name = options.mongo_uri.rsplit('/', 1)[-1]
@@ -36,6 +42,43 @@ class MainHandler(tornado.web.RequestHandler):
 
     def get(self):
         self.render('index.html')
+
+
+class AnalyticsHandler(tornado.web.RequestHandler):
+
+    @tornado.gen.coroutine
+    def get(self):
+        db = self.application.db
+        table_name = self.settings['table_analytics']
+
+        ip = self.get_argument('ip', None)
+        query = {'ip': ip} if ip else {}
+        cursor = db[table_name].find(query).sort('_id', -1)
+
+        users = set()
+        occurrence = {'total': [], 'day': [], 'hour': []}
+        pivot_day = pytz.utc.localize(datetime.now() - timedelta(days=1))
+        pivot_hour = pytz.utc.localize(datetime.now() - timedelta(hours=1))
+
+        while (yield cursor.fetch_next):
+            item = cursor.next_object()
+            access_time = item['_id'].generation_time
+            users.add(item['ip'])
+
+            occurrence['total'].append(item['op'])
+            if access_time > pivot_day:
+                occurrence['day'].append(item['op'])
+            if access_time > pivot_hour:
+                occurrence['hour'].append(item['op'])
+
+        access_count = dict((k, len(v)) for (k, v) in occurrence.items())
+        opcode_count = dict((k, dict((v.count(o), o) for o in set(v)))
+                            for (k, v) in occurrence.items())
+
+        self.render('analytics.html',
+                    users=users, ip=ip,
+                    access_count=access_count,
+                    opcode_count=opcode_count)
 
 
 class MessageQueue(object):
