@@ -99,6 +99,7 @@ RemonLifecycleGraph.prototype.update = function() {
     this.graph = d3.timeline()
                    .width(width)
                    .stack()
+                   .margin({left:150, right:0, top:0, bottom:0})
                    .hover(function (d, i, datum) {
                        $('#' + valueId).text(datum.label);
                    })
