@@ -34,6 +34,7 @@ RemonSocket.prototype.connect = function() {
 RemonSocket.prototype.send = function(data) {
     var text = JSON.stringify(data);
     console.log('Websocket sent:', data);
+    $('#loader').show();
     this.ws.send(text);
 }
 
@@ -73,5 +74,6 @@ RemonSocket.prototype.onClose = function() {
 RemonSocket.prototype.onMessage = function(event) {
     var data = JSON.parse(event.data);
     console.log('Websocket received:', event.data);
+    $('#loader').hide();
     this.callback(data);
 }
