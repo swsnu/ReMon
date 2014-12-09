@@ -28,6 +28,18 @@ RemonDashboard.prototype.addMessage = function(message) {
 }
 
 
+RemonDashboard.prototype.addEvent = function(ev) {
+    if (ev.tag in this.graphs === false) {
+        var id = Object.keys(this.graphs).length;
+        var graph = new RemonLifecycleGraph({ id: id, name: ev.tag });
+        this.graphs[ev.tag] = graph;
+        graph.draw();
+    }
+
+    var graph = this.graphs[ev.tag];
+    graph.addValue(ev.time, ev.value, ev.type);
+}
+
 RemonDashboard.prototype.showAppList = function() {
     var source = $('#template-app-list').html();
     var template = Handlebars.compile(source);
@@ -60,6 +72,9 @@ RemonDashboard.prototype.callback = function(data) {
         }
         for (var i in data.messages) {
             this.addMessage(data.messages[i]);
+        }
+        for (var i in data.event) {
+            this.addEvent(data.events[i]);
         }
     }
     else {

@@ -32,7 +32,7 @@ function RemonTimeseriesGraph(params) {
 
 
 RemonTimeseriesGraph.prototype.draw = function() {
-    var source = $('#template-graph').html();
+    var source = $('#template-timeseries-graph').html();
     var template = Handlebars.compile(source);
     $('#metric-box').append(template(this));
 
@@ -81,4 +81,31 @@ RemonLifecycleGraph.prototype.constructor = RemonLifecycleGraph;
 function RemonLifecycleGraph(params) {
     params = params || {};
     RemonGraph.call(this, params);
+}
+
+RemonLifecycleGraph.prototype.draw = function() {
+    var source = $('#template-lifecycle-graph').html();
+    var template = Handlebars.compile(source);
+    $('#metric-box').append(template(this));
+
+    var element = document.getElementById(this.chartId);
+
+    this.graph = d3.timeline();
+
+    var testData = [
+        {label: "person a", times: [
+              {"starting_time": 1355752800000, "ending_time": 1355759900000},
+              {"starting_time": 1355767900000, "ending_time": 1355774400000}]},
+        {label: "person b", times: [
+              {"starting_time": 1355759910000, "ending_time": 1355761900000}]},
+        {label: "person c", times: [
+              {"starting_time": 1355761910000, "ending_time": 1355763910000}]},
+    ];
+
+    var svg = d3.select('#' + this.chartId).append('svg').attr('width', 500).datum(testData).call(chart);
+}
+
+RemonLifecycleGraph.prototype.addValue = function(time, tag, type) {
+    /* FIXME */
+    console.log('Lifecycle.addValue', time, tag, type);
 }
