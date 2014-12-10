@@ -30,7 +30,7 @@ public class RemonMessenger implements EventHandler<TaskMessage> {
   @Inject
   public RemonMessenger(final ReefEventStateManager reefStateManager,
                         @Parameter(DriverIdentifier.class) final String driverId) {
-    this.monitorAddress = "ws://192.168.43.242:8000/websocket";
+    this.monitorAddress = "ws://remon-client.herokuapp.com:80/websocket";
     this.reefStateManager = reefStateManager;
     this.appId = driverId + "-" + System.currentTimeMillis();
   }
