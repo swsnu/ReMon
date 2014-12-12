@@ -2,7 +2,7 @@
 
 function RemonDashboard() {
     this.appList = [];
-    this.appId = '';
+    this.appId = null;
     this.graphs = {};
     this.timeline = null;
     this.rs = new RemonSocket({ callback: this.callback.bind(this) });
@@ -78,8 +78,17 @@ RemonDashboard.prototype.requestSubscribe = function(appId) {
 
 
 RemonDashboard.prototype.callback = function(data) {
-    if (data.op === 'list') {
+    if (data.op === '_reconnect_') {
+        if (this.appId === null) {
+            this.requestAppList();
+        }
+        else {
+            this.requestSubscribe(this.appId);
+        }
+    }
+    else if (data.op === 'list') {
         this.appList = data.app_list;
+        this.appId = null;
         this.showAppList();
     }
     else if (data.op === 'subscribe') {
