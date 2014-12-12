@@ -49,7 +49,7 @@ RemonSocket.prototype.onOpen = function() {
         this.reconnectIntervalId = 0;
     }
 
-    this.send({ op: 'list' });
+    this.callback({ op: '_reconnect_' });
 }
 
 
